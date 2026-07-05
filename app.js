@@ -475,6 +475,9 @@ function selectOption(option) {
                 btn.classList.add('selected');
             }
         });
+
+        // Auto-submit for single choice and judge questions
+        submitAnswer();
     }
 }
 
@@ -595,6 +598,11 @@ function submitAnswer() {
 
     // Highlight grid
     renderQuestionGrid();
+
+    // Auto-advance to next question after a short delay
+    setTimeout(() => {
+        nextQuestion();
+    }, 1500);
 }
 
 function showAnswerFeedback(question, selected) {
