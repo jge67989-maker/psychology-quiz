@@ -250,6 +250,19 @@
             </div>
 
             <div id="authMessage" class="mt-4 text-center text-sm"></div>
+
+            <div class="mt-6 pt-4 border-t border-gray-200">
+                <p class="text-center text-xs text-gray-400 mb-2">数据备份</p>
+                <div class="flex space-x-2">
+                    <button onclick="exportAllData()" class="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-600 text-xs py-2 rounded-lg transition">
+                        <i class="fas fa-download mr-1"></i>导出数据
+                    </button>
+                    <label class="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-600 text-xs py-2 rounded-lg transition cursor-pointer text-center">
+                        <i class="fas fa-upload mr-1"></i>导入数据
+                        <input type="file" accept=".json" onchange="importAllData(event)" class="hidden">
+                    </label>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -456,6 +469,9 @@
                         题目加载中...
                     </h2>
 
+                    <div id="multiHint" class="hidden mb-3 text-sm text-orange-600 bg-orange-50 rounded-lg p-2">
+                        <i class="fas fa-info-circle mr-1"></i>多选题：请选择所有正确答案
+                    </div>
                     <div class="space-y-3" id="optionsContainer">
                         <!-- Options will be inserted here -->
                     </div>

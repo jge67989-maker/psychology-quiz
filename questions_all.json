@@ -1,10 +1,4 @@
-// Psychology Quiz Questions - Auto Generated
-// Total: 1526 questions
-// Single: 961
-// Multi: 169
-// Judge: 396
-
-const QUESTIONS = [
+[
   {
     "id": 1,
     "type": "single",
@@ -17610,4 +17604,4 @@ const QUESTIONS = [
     },
     "answer": "B"
   }
-];
+]

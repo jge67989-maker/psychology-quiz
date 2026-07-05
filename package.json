@@ -1,0 +1,9 @@
+{
+  "name": "psychology-quiz",
+  "version": "1.0.0",
+  "description": "心理学刷题宝典",
+  "main": "index.html",
+  "scripts": {
+    "dev": "npx serve ."
+  }
+}

@@ -6,25 +6,37 @@
 let currentUser = null;
 let currentMode = 'sequential';
 let currentQuestionIndex = 0;
-let selectedOption = null;
+let selectedOption = null; // For single/judge: string, For multi: array
 let isAnswered = false;
 let examQuestions = [];
 let examTimer = null;
 let examStartTime = null;
 let filteredQuestions = [...QUESTIONS];
 let rangeStart = 1;
-let rangeEnd = QUESTIONS.length;
+let rangeEnd = QUESTIONS.length > 0 ? QUESTIONS[QUESTIONS.length - 1].id : 700;
 
 // ==========================================
 // Authentication Functions
 // ==========================================
 
 function getUsers() {
-    return JSON.parse(localStorage.getItem('psych_users') || '{}');
+    try {
+        const data = localStorage.getItem('psych_users');
+        return data ? JSON.parse(data) : {};
+    } catch (e) {
+        console.error('Error reading users:', e);
+        return {};
+    }
 }
 
 function saveUsers(users) {
-    localStorage.setItem('psych_users', JSON.stringify(users));
+    try {
+        localStorage.setItem('psych_users', JSON.stringify(users));
+        console.log('Users saved successfully, count:', Object.keys(users).length);
+    } catch (e) {
+        console.error('Error saving users:', e);
+        showToast('数据保存失败，请检查浏览器设置', 'error');
+    }
 }
 
 function getCurrentUser() {
@@ -35,10 +47,27 @@ function getCurrentUser() {
 }
 
 function saveCurrentUser(user) {
-    const users = getUsers();
-    users[user.id] = user;
-    saveUsers(users);
-    localStorage.setItem('psych_current_user', user.id);
+    try {
+        const users = getUsers();
+        users[user.id] = user;
+        saveUsers(users);
+        localStorage.setItem('psych_current_user', user.id);
+        console.log('Current user saved:', user.id);
+    } catch (e) {
+        console.error('Error saving current user:', e);
+    }
+}
+
+// Check if localStorage is available
+function isLocalStorageAvailable() {
+    try {
+        const test = '__test__';
+        localStorage.setItem(test, test);
+        localStorage.removeItem(test);
+        return true;
+    } catch (e) {
+        return false;
+    }
 }
 
 function showRegister() {
@@ -154,6 +183,12 @@ function logout() {
 }
 
 function checkAuth() {
+    // Check if localStorage is available
+    if (!isLocalStorageAvailable()) {
+        showMessage('您的浏览器不支持数据保存功能，请尝试使用其他浏览器', 'error');
+        return;
+    }
+
     const user = getCurrentUser();
     if (user) {
         currentUser = user;
@@ -305,6 +340,14 @@ function loadQuestion() {
 
     // Update question display
     document.getElementById('questionNumber').textContent = `第 ${question.id} 题`;
+
+    // Update question type display
+    const typeLabels = { single: '单选题', multi: '多选题', judge: '判断题' };
+    const typeColors = { single: 'bg-gray-100 text-gray-600', multi: 'bg-orange-100 text-orange-600', judge: 'bg-teal-100 text-teal-600' };
+    const typeEl = document.getElementById('questionType');
+    typeEl.textContent = typeLabels[question.type] || '单选题';
+    typeEl.className = `px-3 py-1 rounded-full text-sm ${typeColors[question.type] || typeColors.single}`;
+
     document.getElementById('questionText').textContent = question.question;
 
     // Update favorite button
@@ -314,16 +357,37 @@ function loadQuestion() {
         '<i class="fas fa-heart text-pink-500 text-lg"></i>' :
         '<i class="far fa-heart text-gray-400 text-lg"></i>';
 
+    // Get options to display based on type
+    let optionKeys = ['A', 'B', 'C', 'D'];
+    if (question.type === 'multi') {
+        optionKeys = Object.keys(question.options).sort();
+    } else if (question.type === 'judge') {
+        optionKeys = ['A', 'B'];
+    }
+
+    // Check if already answered (but not in wrong/favorite mode which allows re-do)
+    const answered = currentUser.stats.answeredQuestions[question.id];
+    const isRetryMode = currentMode === 'wrong' || currentMode === 'favorite';
+
     // Render options
-    const optionsHtml = ['A', 'B', 'C', 'D'].map(opt => {
-        const isAnswered = currentUser.stats.answeredQuestions[question.id];
+    const optionsHtml = optionKeys.filter(opt => question.options[opt]).map(opt => {
         let classes = 'option-btn rounded-xl p-4 cursor-pointer flex items-center space-x-3';
 
-        if (isAnswered) {
-            if (opt === question.answer) {
-                classes += ' correct';
-            } else if (opt === isAnswered.selected && isAnswered.selected !== question.answer) {
-                classes += ' wrong';
+        // Only show correct/wrong if already answered AND not in retry mode
+        if (answered && !isRetryMode) {
+            if (question.type === 'multi') {
+                if (question.answer.includes(opt)) {
+                    classes += ' correct';
+                }
+                if (answered.selected.includes(opt) && !question.answer.includes(opt)) {
+                    classes += ' wrong';
+                }
+            } else {
+                if (opt === question.answer) {
+                    classes += ' correct';
+                } else if (opt === answered.selected && answered.selected !== question.answer) {
+                    classes += ' wrong';
+                }
             }
         }
 
@@ -333,25 +397,32 @@ function loadQuestion() {
                     ${opt}
                 </div>
                 <span class="flex-1 text-gray-700">${question.options[opt] || ''}</span>
-                ${isAnswered && opt === question.answer ? '<i class="fas fa-check-circle text-green-500"></i>' : ''}
-                ${isAnswered && opt === isAnswered.selected && isAnswered.selected !== question.answer ? '<i class="fas fa-times-circle text-red-500"></i>' : ''}
+                ${answered && !isRetryMode && opt === question.answer ? '<i class="fas fa-check-circle text-green-500"></i>' : ''}
+                ${answered && !isRetryMode && opt === answered.selected && answered.selected !== question.answer ? '<i class="fas fa-times-circle text-red-500"></i>' : ''}
             </div>
         `;
     }).join('');
 
     document.getElementById('optionsContainer').innerHTML = optionsHtml;
 
+    // Show/hide multi-choice hint
+    const multiHint = document.getElementById('multiHint');
+    if (question.type === 'multi') {
+        multiHint.classList.remove('hidden');
+    } else {
+        multiHint.classList.add('hidden');
+    }
+
     // Reset state
-    selectedOption = null;
+    selectedOption = question.type === 'multi' ? [] : null;
     isAnswered = false;
     document.getElementById('answerFeedback').classList.add('hidden');
     document.getElementById('analysisSection').classList.add('hidden');
     document.getElementById('submitBtn').classList.remove('hidden');
     document.getElementById('nextBtn').classList.add('hidden');
 
-    // Check if already answered
-    const answered = currentUser.stats.answeredQuestions[question.id];
-    if (answered) {
+    // If already answered AND not in retry mode, show feedback and hide submit button
+    if (answered && !isRetryMode) {
         isAnswered = true;
         document.getElementById('submitBtn').classList.add('hidden');
         document.getElementById('nextBtn').classList.remove('hidden');
@@ -369,19 +440,45 @@ function loadQuestion() {
 function selectOption(option) {
     if (isAnswered) return;
 
-    selectedOption = option;
+    const pool = getQuestionPool();
+    const question = pool[currentQuestionIndex];
+    if (!question) return;
 
-    // Update visual selection
-    document.querySelectorAll('.option-btn').forEach(btn => {
-        btn.classList.remove('selected');
-        if (btn.dataset.option === option) {
-            btn.classList.add('selected');
+    if (question.type === 'multi') {
+        // Multi-choice: toggle selection
+        if (!selectedOption) selectedOption = [];
+        if (!Array.isArray(selectedOption)) selectedOption = [];
+
+        const idx = selectedOption.indexOf(option);
+        if (idx > -1) {
+            selectedOption.splice(idx, 1);
+        } else {
+            selectedOption.push(option);
         }
-    });
+
+        // Update visual selection
+        document.querySelectorAll('.option-btn').forEach(btn => {
+            btn.classList.remove('selected');
+            if (selectedOption.includes(btn.dataset.option)) {
+                btn.classList.add('selected');
+            }
+        });
+    } else {
+        // Single-choice or judge: single selection
+        selectedOption = option;
+
+        // Update visual selection
+        document.querySelectorAll('.option-btn').forEach(btn => {
+            btn.classList.remove('selected');
+            if (btn.dataset.option === option) {
+                btn.classList.add('selected');
+            }
+        });
+    }
 }
 
 function submitAnswer() {
-    if (!selectedOption) {
+    if (!selectedOption || (Array.isArray(selectedOption) && selectedOption.length === 0)) {
         showToast('请先选择答案', 'error');
         return;
     }
@@ -391,12 +488,36 @@ function submitAnswer() {
     if (!question) return;
 
     isAnswered = true;
-    const isCorrect = selectedOption === question.answer;
+
+    let isCorrect = false;
+    let selectedStr = '';
+
+    if (question.type === 'multi') {
+        // Multi-choice: sort and compare
+        const sortedSelected = [...selectedOption].sort().join('');
+        const sortedAnswer = question.answer.split('').sort().join('');
+        isCorrect = sortedSelected === sortedAnswer;
+        selectedStr = sortedSelected;
+    } else {
+        // Single-choice or judge
+        isCorrect = selectedOption === question.answer;
+        selectedStr = selectedOption;
+    }
+
+    // Check if this is a retry (in wrong/favorite mode)
+    const isRetryMode = currentMode === 'wrong' || currentMode === 'favorite';
+    const wasPreviouslyAnswered = currentUser.stats.answeredQuestions[question.id];
 
     // Update stats
-    currentUser.stats.totalAnswered++;
+    if (!isRetryMode || !wasPreviouslyAnswered) {
+        // Only increment totalAnswered if not a retry
+        currentUser.stats.totalAnswered++;
+    }
+
     if (isCorrect) {
-        currentUser.stats.totalCorrect++;
+        if (!isRetryMode || !wasPreviouslyAnswered) {
+            currentUser.stats.totalCorrect++;
+        }
         currentUser.stats.points += 10;
 
         // Remove from wrong if was there
@@ -405,7 +526,9 @@ function submitAnswer() {
             currentUser.stats.wrongQuestions.splice(wrongIdx, 1);
         }
     } else {
-        currentUser.stats.totalWrong++;
+        if (!isRetryMode || !wasPreviouslyAnswered) {
+            currentUser.stats.totalWrong++;
+        }
         if (!currentUser.stats.wrongQuestions.includes(question.id)) {
             currentUser.stats.wrongQuestions.push(question.id);
         }
@@ -413,7 +536,7 @@ function submitAnswer() {
 
     // Record answer
     currentUser.stats.answeredQuestions[question.id] = {
-        selected: selectedOption,
+        selected: selectedStr,
         correct: isCorrect,
         timestamp: new Date().toISOString()
     };
@@ -438,15 +561,24 @@ function submitAnswer() {
     updateBadges();
 
     // Show feedback
-    showAnswerFeedback(question, selectedOption);
+    showAnswerFeedback(question, selectedStr);
 
     // Update options visual
     document.querySelectorAll('.option-btn').forEach(btn => {
-        if (btn.dataset.option === question.answer) {
+        const opt = btn.dataset.option;
+        // Highlight correct answer
+        if (question.answer.includes(opt)) {
             btn.classList.add('correct');
         }
-        if (btn.dataset.option === selectedOption && !isCorrect) {
-            btn.classList.add('wrong');
+        // Highlight wrong selection
+        if (question.type === 'multi') {
+            if (selectedOption.includes(opt) && !question.answer.includes(opt)) {
+                btn.classList.add('wrong');
+            }
+        } else {
+            if (opt === selectedStr && !isCorrect) {
+                btn.classList.add('wrong');
+            }
         }
         btn.style.cursor = 'default';
     });
@@ -454,6 +586,11 @@ function submitAnswer() {
     // Toggle buttons
     document.getElementById('submitBtn').classList.add('hidden');
     document.getElementById('nextBtn').classList.remove('hidden');
+
+    // Show special message in wrong mode when answered correctly
+    if (currentMode === 'wrong' && isCorrect) {
+        showToast('回答正确！已从错题中移除', 'success');
+    }
 
     // Highlight grid
     renderQuestionGrid();
@@ -466,15 +603,30 @@ function showAnswerFeedback(question, selected) {
     const correct = document.getElementById('correctAnswer');
 
     const isCorrect = selected === question.answer;
+    const isRetryMode = currentMode === 'wrong' || currentMode === 'favorite';
 
     feedback.classList.remove('hidden');
     feedback.className = `mt-6 p-4 rounded-xl ${isCorrect ? 'bg-green-50' : 'bg-red-50'}`;
 
     icon.className = isCorrect ? 'fas fa-check-circle text-green-500 text-xl' : 'fas fa-times-circle text-red-500 text-xl';
     text.className = isCorrect ? 'font-bold text-green-700' : 'font-bold text-red-700';
-    text.textContent = isCorrect ? '回答正确！' : '回答错误';
 
-    correct.textContent = `正确答案：${question.answer}. ${question.options[question.answer]}`;
+    // Show different messages based on mode
+    if (isRetryMode) {
+        text.textContent = isCorrect ? '回答正确！已从错题中移除' : '回答错误，继续努力！';
+    } else {
+        text.textContent = isCorrect ? '回答正确！' : '回答错误';
+    }
+
+    // Build correct answer text
+    let correctText = '';
+    if (question.type === 'multi') {
+        const answerLetters = question.answer.split('').sort();
+        correctText = `正确答案：${answerLetters.join('')}. ${answerLetters.map(l => question.options[l]).join('、')}`;
+    } else {
+        correctText = `正确答案：${question.answer}. ${question.options[question.answer]}`;
+    }
+    correct.textContent = correctText;
 }
 
 function showAnalysis() {
@@ -510,7 +662,10 @@ function nextQuestion() {
     const pool = getQuestionPool();
     if (currentQuestionIndex < pool.length - 1) {
         currentQuestionIndex++;
+        // Update grid page if needed
+        gridPage = Math.floor(currentQuestionIndex / GRID_PAGE_SIZE);
         loadQuestion();
+        renderQuestionGrid();
     } else {
         if (currentMode === 'exam') {
             finishExam();
@@ -523,7 +678,10 @@ function nextQuestion() {
 function prevQuestion() {
     if (currentQuestionIndex > 0) {
         currentQuestionIndex--;
+        // Update grid page if needed
+        gridPage = Math.floor(currentQuestionIndex / GRID_PAGE_SIZE);
         loadQuestion();
+        renderQuestionGrid();
     }
 }
 
@@ -545,7 +703,9 @@ function jumpToQuestion() {
     }
 
     currentQuestionIndex = idx;
+    gridPage = Math.floor(idx / GRID_PAGE_SIZE); // Update grid page
     loadQuestion();
+    renderQuestionGrid();
     showToast(`已跳转到第 ${qId} 题`, 'success');
     input.value = '';
 }
@@ -557,6 +717,7 @@ function jumpToQuestion() {
 function switchMode(mode) {
     currentMode = mode;
     currentQuestionIndex = 0;
+    gridPage = 0; // Reset grid page
 
     // Update sidebar active state
     document.querySelectorAll('.sidebar-item').forEach(item => {
@@ -612,13 +773,14 @@ function getFilteredQuestions() {
 
 function applyRange() {
     const start = parseInt(document.getElementById('rangeStart').value) || 1;
-    const end = parseInt(document.getElementById('rangeEnd').value) || QUESTIONS.length;
+    const end = parseInt(document.getElementById('rangeEnd').value) || (QUESTIONS.length > 0 ? QUESTIONS[QUESTIONS.length - 1].id : 700);
 
     rangeStart = Math.max(1, start);
-    rangeEnd = Math.min(QUESTIONS[QUESTIONS.length - 1].id, end);
+    rangeEnd = Math.min(QUESTIONS.length > 0 ? QUESTIONS[QUESTIONS.length - 1].id : 700, end);
 
     filteredQuestions = QUESTIONS.filter(q => q.id >= rangeStart && q.id <= rangeEnd);
     currentQuestionIndex = 0;
+    gridPage = 0; // Reset grid page
 
     showToast(`已设置范围: ${rangeStart} - ${rangeEnd} (${filteredQuestions.length}题)`, 'success');
     loadQuestion();
@@ -630,11 +792,12 @@ function applyRange() {
 // ==========================================
 
 function startExam() {
-    const questionCount = 50; // Exam has 50 questions
+    const questionCount = Math.min(50, QUESTIONS.length); // Exam has 50 questions or less
     const allQuestions = [...QUESTIONS];
     examQuestions = shuffleArray(allQuestions).slice(0, questionCount);
 
     currentQuestionIndex = 0;
+    gridPage = 0; // Reset grid page
     examStartTime = Date.now();
 
     // Show timer
@@ -670,7 +833,9 @@ function finishExam() {
 
     examQuestions.forEach(q => {
         const answer = currentUser.stats.answeredQuestions[q.id];
-        if (answer && answer.correct) correctCount++;
+        if (answer && answer.correct) {
+            correctCount++;
+        }
     });
 
     const accuracy = Math.round((correctCount / totalQuestions) * 100);
@@ -741,14 +906,20 @@ function toggleFavorite() {
 // Question Grid
 // ==========================================
 
+let gridPage = 0;
+const GRID_PAGE_SIZE = 100;
+
 function renderQuestionGrid() {
     const pool = getQuestionPool();
     const grid = document.getElementById('questionGrid');
 
-    let html = '';
-    const maxDisplay = Math.min(pool.length, 100); // Limit display
+    const totalPages = Math.ceil(pool.length / GRID_PAGE_SIZE);
+    const startIdx = gridPage * GRID_PAGE_SIZE;
+    const endIdx = Math.min(startIdx + GRID_PAGE_SIZE, pool.length);
 
-    for (let i = 0; i < maxDisplay; i++) {
+    let html = '';
+
+    for (let i = startIdx; i < endIdx; i++) {
         const q = pool[i];
         const answered = currentUser.stats.answeredQuestions[q.id];
         let bgColor = 'bg-gray-200 hover:bg-gray-300';
@@ -761,19 +932,38 @@ function renderQuestionGrid() {
             bgColor = 'bg-purple-500';
         }
 
-        html += `<button onclick="goToGridQuestion(${i})" class="${bgColor} text-white text-xs rounded-lg p-2 transition">${q.id}</button>`;
+        html += `<button onclick="goToGridQuestion(${i})" class="${bgColor} text-white text-xs rounded-lg p-2 transition" title="第${q.id}题">${q.id}</button>`;
     }
 
-    if (pool.length > maxDisplay) {
-        html += `<div class="col-span-full text-center text-gray-500 text-sm">还有 ${pool.length - maxDisplay} 题...</div>`;
+    // Add pagination controls
+    if (totalPages > 1) {
+        html += `<div class="col-span-full flex items-center justify-center space-x-2 mt-3">`;
+        if (gridPage > 0) {
+            html += `<button onclick="changeGridPage(-1)" class="bg-gray-200 hover:bg-gray-300 text-gray-700 px-3 py-1 rounded text-sm">上一页</button>`;
+        }
+        html += `<span class="text-sm text-gray-500">${gridPage + 1}/${totalPages}</span>`;
+        if (gridPage < totalPages - 1) {
+            html += `<button onclick="changeGridPage(1)" class="bg-gray-200 hover:bg-gray-300 text-gray-700 px-3 py-1 rounded text-sm">下一页</button>`;
+        }
+        html += `</div>`;
     }
 
     grid.innerHTML = html;
 }
 
+function changeGridPage(delta) {
+    const pool = getQuestionPool();
+    const totalPages = Math.ceil(pool.length / GRID_PAGE_SIZE);
+    gridPage = Math.max(0, Math.min(totalPages - 1, gridPage + delta));
+    renderQuestionGrid();
+}
+
 function goToGridQuestion(index) {
     currentQuestionIndex = index;
+    // Update grid page if needed
+    gridPage = Math.floor(index / GRID_PAGE_SIZE);
     loadQuestion();
+    renderQuestionGrid();
 }
 
 function highlightGridQuestion(questionId) {
@@ -988,6 +1178,16 @@ document.addEventListener('keydown', (e) => {
         case 'D':
             if (!isAnswered) selectOption('D');
             break;
+        case '5':
+        case 'e':
+        case 'E':
+            if (!isAnswered) selectOption('E');
+            break;
+        case '6':
+        case 'f':
+        case 'F':
+            if (!isAnswered) selectOption('F');
+            break;
         case 'Enter':
             if (!isAnswered && selectedOption) {
                 submitAnswer();
@@ -1014,6 +1214,50 @@ document.addEventListener('click', (e) => {
         closeUserMenu();
     }
 });
+
+// ==========================================
+// Data Export/Import Functions
+// ==========================================
+
+function exportAllData() {
+    const users = getUsers();
+    const data = {
+        exportDate: new Date().toISOString(),
+        version: '1.0',
+        users: users
+    };
+
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `心理学题库_备份_${new Date().toISOString().split('T')[0]}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+    showMessage('数据导出成功！', 'success');
+}
+
+function importAllData(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        try {
+            const data = JSON.parse(e.target.result);
+            if (data.users) {
+                saveUsers(data.users);
+                showMessage('数据导入成功！请刷新页面后登录', 'success');
+                setTimeout(() => location.reload(), 1500);
+            } else {
+                showMessage('无效的备份文件', 'error');
+            }
+        } catch (err) {
+            showMessage('导入失败：文件格式错误', 'error');
+        }
+    };
+    reader.readAsText(file);
+}
 
 // ==========================================
 // Initialize App

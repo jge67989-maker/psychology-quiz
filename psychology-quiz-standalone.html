@@ -1,4 +1,653 @@
-[
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>心理学刷题宝典</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&display=swap');
+
+        * {
+            font-family: 'Noto Sans SC', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 8px 32px rgba(31, 38, 135, 0.15);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #eb3349 0%, #f45c43 100%);
+        }
+
+        .btn-warning {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+
+        .option-btn {
+            transition: all 0.3s ease;
+            border: 2px solid #e2e8f0;
+        }
+
+        .option-btn:hover {
+            border-color: #667eea;
+            transform: translateX(5px);
+        }
+
+        .option-btn.selected {
+            border-color: #667eea;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+        }
+
+        .option-btn.correct {
+            border-color: #38ef7d;
+            background: linear-gradient(135deg, rgba(17, 153, 142, 0.1) 0%, rgba(56, 239, 125, 0.1) 100%);
+        }
+
+        .option-btn.wrong {
+            border-color: #f45c43;
+            background: linear-gradient(135deg, rgba(235, 51, 73, 0.1) 0%, rgba(244, 92, 67, 0.1) 100%);
+        }
+
+        .progress-bar {
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            transition: width 0.5s ease;
+        }
+
+        .stat-card {
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .slide-in {
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(-20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .sidebar {
+            transition: all 0.3s ease;
+        }
+
+        .sidebar-item {
+            transition: all 0.3s ease;
+        }
+
+        .sidebar-item:hover, .sidebar-item.active {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.2) 0%, rgba(118, 75, 162, 0.2) 100%);
+        }
+
+        .chart-bar {
+            transition: height 0.5s ease;
+        }
+
+        .tooltip {
+            position: relative;
+        }
+
+        .tooltip::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #333;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 12px;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .tooltip:hover::after {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 10px;
+        }
+
+        .confetti {
+            position: fixed;
+            width: 10px;
+            height: 10px;
+            background: #f0f;
+            animation: confetti-fall 3s ease-in-out forwards;
+            z-index: 1000;
+        }
+
+        @keyframes confetti-fall {
+            0% { transform: translateY(-100vh) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Login/Register Page -->
+    <div id="authPage" class="min-h-screen flex items-center justify-center p-4">
+        <div class="glass-card rounded-2xl p-8 w-full max-w-md fade-in">
+            <div class="text-center mb-8">
+                <div class="w-20 h-20 bg-gradient-to-r from-purple-500 to-indigo-500 rounded-full mx-auto mb-4 flex items-center justify-center">
+                    <i class="fas fa-brain text-white text-3xl"></i>
+                </div>
+                <h1 class="text-3xl font-bold text-gray-800">心理学刷题宝典</h1>
+                <p class="text-gray-500 mt-2">2026年1月复习专用</p>
+            </div>
+
+            <div id="loginForm">
+                <div class="mb-4">
+                    <label class="block text-gray-700 text-sm font-bold mb-2">
+                        <i class="fas fa-user mr-2"></i>用户名
+                    </label>
+                    <input type="text" id="loginUsername" placeholder="请输入用户名"
+                        class="w-full px-4 py-3 rounded-lg border-2 border-gray-200 focus:border-purple-500 focus:outline-none transition">
+                </div>
+                <div class="mb-6">
+                    <label class="block text-gray-700 text-sm font-bold mb-2">
+                        <i class="fas fa-lock mr-2"></i>密码
+                    </label>
+                    <input type="password" id="loginPassword" placeholder="请输入密码"
+                        class="w-full px-4 py-3 rounded-lg border-2 border-gray-200 focus:border-purple-500 focus:outline-none transition">
+                </div>
+                <button onclick="login()" class="w-full btn-primary text-white font-bold py-3 rounded-lg mb-4">
+                    <i class="fas fa-sign-in-alt mr-2"></i>登录
+                </button>
+                <p class="text-center text-gray-500">
+                    还没有账号？<a href="#" onclick="showRegister()" class="text-purple-600 hover:text-purple-800 font-bold">立即注册</a>
+                </p>
+            </div>
+
+            <div id="registerForm" style="display:none">
+                <div class="mb-4">
+                    <label class="block text-gray-700 text-sm font-bold mb-2">
+                        <i class="fas fa-user mr-2"></i>用户名
+                    </label>
+                    <input type="text" id="regUsername" placeholder="请输入用户名"
+                        class="w-full px-4 py-3 rounded-lg border-2 border-gray-200 focus:border-purple-500 focus:outline-none transition">
+                </div>
+                <div class="mb-4">
+                    <label class="block text-gray-700 text-sm font-bold mb-2">
+                        <i class="fas fa-lock mr-2"></i>密码
+                    </label>
+                    <input type="password" id="regPassword" placeholder="请输入密码"
+                        class="w-full px-4 py-3 rounded-lg border-2 border-gray-200 focus:border-purple-500 focus:outline-none transition">
+                </div>
+                <div class="mb-6">
+                    <label class="block text-gray-700 text-sm font-bold mb-2">
+                        <i class="fas fa-signature mr-2"></i>昵称（选填）
+                    </label>
+                    <input type="text" id="regNickname" placeholder="给自己取个名字吧"
+                        class="w-full px-4 py-3 rounded-lg border-2 border-gray-200 focus:border-purple-500 focus:outline-none transition">
+                </div>
+                <button onclick="register()" class="w-full btn-success text-white font-bold py-3 rounded-lg mb-4">
+                    <i class="fas fa-user-plus mr-2"></i>注册
+                </button>
+                <p class="text-center text-gray-500">
+                    已有账号？<a href="#" onclick="showLogin()" class="text-purple-600 hover:text-purple-800 font-bold">立即登录</a>
+                </p>
+            </div>
+
+            <div id="authMessage" class="mt-4 text-center text-sm"></div>
+        </div>
+    </div>
+
+    <!-- Main App -->
+    <div id="mainApp" style="display:none" class="min-h-screen">
+        <!-- Top Navigation -->
+        <nav class="glass-card shadow-lg sticky top-0 z-50">
+            <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                    <button onclick="toggleSidebar()" class="lg:hidden text-gray-600 hover:text-purple-600">
+                        <i class="fas fa-bars text-xl"></i>
+                    </button>
+                    <div class="flex items-center space-x-2">
+                        <div class="w-10 h-10 bg-gradient-to-r from-purple-500 to-indigo-500 rounded-full flex items-center justify-center">
+                            <i class="fas fa-brain text-white"></i>
+                        </div>
+                        <span class="font-bold text-gray-800 hidden sm:block">心理学刷题宝典</span>
+                    </div>
+                </div>
+
+                <div class="flex items-center space-x-4">
+                    <div class="hidden md:flex items-center space-x-2 bg-gray-100 rounded-full px-4 py-2">
+                        <i class="fas fa-fire text-orange-500"></i>
+                        <span class="text-sm font-bold" id="streakCount">0</span>
+                        <span class="text-xs text-gray-500">天连续</span>
+                    </div>
+                    <div class="hidden md:flex items-center space-x-2 bg-gray-100 rounded-full px-4 py-2">
+                        <i class="fas fa-star text-yellow-500"></i>
+                        <span class="text-sm font-bold" id="totalPoints">0</span>
+                        <span class="text-xs text-gray-500">积分</span>
+                    </div>
+                    <div class="relative">
+                        <button onclick="toggleUserMenu()" class="flex items-center space-x-2 bg-gray-100 rounded-full px-4 py-2 hover:bg-gray-200 transition">
+                            <div class="w-8 h-8 bg-gradient-to-r from-purple-500 to-indigo-500 rounded-full flex items-center justify-center">
+                                <i class="fas fa-user text-white text-sm"></i>
+                            </div>
+                            <span class="text-sm font-bold hidden sm:block" id="userDisplayName">用户</span>
+                            <i class="fas fa-chevron-down text-xs text-gray-500"></i>
+                        </button>
+                        <div id="userMenu" class="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-xl hidden z-50">
+                            <div class="p-4 border-b">
+                                <p class="font-bold text-gray-800" id="menuUsername">用户</p>
+                                <p class="text-xs text-gray-500" id="menuUserStats">已答 0 题</p>
+                            </div>
+                            <div class="p-2">
+                                <button onclick="showProfile()" class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-lg">
+                                    <i class="fas fa-chart-line mr-2"></i>学习统计
+                                </button>
+                                <button onclick="exportData()" class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-lg">
+                                    <i class="fas fa-download mr-2"></i>导出数据
+                                </button>
+                                <button onclick="logout()" class="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 rounded-lg">
+                                    <i class="fas fa-sign-out-alt mr-2"></i>退出登录
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <div class="flex">
+            <!-- Sidebar -->
+            <aside id="sidebar" class="sidebar fixed lg:sticky top-16 left-0 w-64 h-[calc(100vh-64px)] glass-card border-r overflow-y-auto z-40 transform -translate-x-full lg:translate-x-0 transition-transform">
+                <div class="p-4">
+                    <div class="mb-6">
+                        <h3 class="text-xs font-bold text-gray-400 uppercase mb-3 px-4">学习模式</h3>
+                        <button onclick="switchMode('sequential')" class="sidebar-item w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-gray-700 mb-1" data-mode="sequential">
+                            <i class="fas fa-list-ol text-purple-500"></i>
+                            <span>顺序刷题</span>
+                        </button>
+                        <button onclick="switchMode('random')" class="sidebar-item w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-gray-700 mb-1" data-mode="random">
+                            <i class="fas fa-random text-blue-500"></i>
+                            <span>随机刷题</span>
+                        </button>
+                        <button onclick="switchMode('wrong')" class="sidebar-item w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-gray-700 mb-1" data-mode="wrong">
+                            <i class="fas fa-exclamation-triangle text-red-500"></i>
+                            <span>错题重做</span>
+                            <span id="wrongCountBadge" class="ml-auto bg-red-500 text-white text-xs px-2 py-1 rounded-full hidden">0</span>
+                        </button>
+                        <button onclick="switchMode('favorite')" class="sidebar-item w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-gray-700 mb-1" data-mode="favorite">
+                            <i class="fas fa-heart text-pink-500"></i>
+                            <span>我的收藏</span>
+                            <span id="favCountBadge" class="ml-auto bg-pink-500 text-white text-xs px-2 py-1 rounded-full hidden">0</span>
+                        </button>
+                        <button onclick="switchMode('exam')" class="sidebar-item w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-gray-700 mb-1" data-mode="exam">
+                            <i class="fas fa-file-alt text-green-500"></i>
+                            <span>模拟考试</span>
+                        </button>
+                        <button onclick="switchMode('chapter')" class="sidebar-item w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-gray-700 mb-1" data-mode="chapter">
+                            <i class="fas fa-book text-indigo-500"></i>
+                            <span>章节练习</span>
+                        </button>
+                    </div>
+
+                    <div class="mb-6">
+                        <h3 class="text-xs font-bold text-gray-400 uppercase mb-3 px-4">题目范围</h3>
+                        <div class="px-4 mb-4">
+                            <label class="text-sm text-gray-600 mb-2 block">题号范围</label>
+                            <div class="flex space-x-2">
+                                <input type="number" id="rangeStart" placeholder="起始" min="1" class="w-1/2 px-3 py-2 border rounded-lg text-sm focus:outline-none focus:border-purple-500">
+                                <input type="number" id="rangeEnd" placeholder="结束" min="1" class="w-1/2 px-3 py-2 border rounded-lg text-sm focus:outline-none focus:border-purple-500">
+                            </div>
+                            <button onclick="applyRange()" class="w-full mt-2 bg-gray-100 hover:bg-gray-200 text-gray-700 py-2 rounded-lg text-sm transition">
+                                应用范围
+                            </button>
+                        </div>
+                    </div>
+
+                    <div>
+                        <h3 class="text-xs font-bold text-gray-400 uppercase mb-3 px-4">快速跳转</h3>
+                        <div class="px-4">
+                            <input type="number" id="jumpToQuestion" placeholder="输入题号" min="1" class="w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:border-purple-500">
+                            <button onclick="jumpToQuestion()" class="w-full mt-2 bg-gray-100 hover:bg-gray-200 text-gray-700 py-2 rounded-lg text-sm transition">
+                                跳转
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- Main Content -->
+            <main class="flex-1 p-4 lg:p-8">
+                <!-- Stats Overview -->
+                <div id="statsOverview" class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6 fade-in">
+                    <div class="stat-card glass-card rounded-xl p-4">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-xs text-gray-500">已完成</p>
+                                <p class="text-2xl font-bold text-purple-600" id="statCompleted">0</p>
+                            </div>
+                            <div class="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center">
+                                <i class="fas fa-check-circle text-purple-500 text-xl"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="stat-card glass-card rounded-xl p-4">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-xs text-gray-500">正确率</p>
+                                <p class="text-2xl font-bold text-green-600" id="statAccuracy">0%</p>
+                            </div>
+                            <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
+                                <i class="fas fa-bullseye text-green-500 text-xl"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="stat-card glass-card rounded-xl p-4">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-xs text-gray-500">错题数</p>
+                                <p class="text-2xl font-bold text-red-600" id="statWrong">0</p>
+                            </div>
+                            <div class="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center">
+                                <i class="fas fa-times-circle text-red-500 text-xl"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="stat-card glass-card rounded-xl p-4">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-xs text-gray-500">收藏数</p>
+                                <p class="text-2xl font-bold text-pink-600" id="statFavorite">0</p>
+                            </div>
+                            <div class="w-12 h-12 bg-pink-100 rounded-full flex items-center justify-center">
+                                <i class="fas fa-heart text-pink-500 text-xl"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Progress Bar -->
+                <div class="glass-card rounded-xl p-4 mb-6 fade-in">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-sm font-bold text-gray-700">学习进度</span>
+                        <span class="text-sm text-gray-500" id="progressText">0/0</span>
+                    </div>
+                    <div class="w-full bg-gray-200 rounded-full h-3">
+                        <div class="progress-bar h-3 rounded-full" id="progressBar" style="width: 0%"></div>
+                    </div>
+                </div>
+
+                <!-- Question Card -->
+                <div id="questionCard" class="glass-card rounded-2xl p-6 lg:p-8 mb-6 fade-in">
+                    <div class="flex items-center justify-between mb-6">
+                        <div class="flex items-center space-x-3">
+                            <span class="bg-gradient-to-r from-purple-500 to-indigo-500 text-white px-4 py-2 rounded-full text-sm font-bold" id="questionNumber">第 1 题</span>
+                            <span class="bg-gray-100 text-gray-600 px-3 py-1 rounded-full text-sm" id="questionType">单选题</span>
+                            <span class="bg-blue-100 text-blue-600 px-3 py-1 rounded-full text-sm hidden" id="examTimer">
+                                <i class="fas fa-clock mr-1"></i><span id="timerDisplay">00:00</span>
+                            </span>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <button onclick="toggleFavorite()" id="favBtn" class="w-10 h-10 rounded-full flex items-center justify-center hover:bg-pink-100 transition">
+                                <i class="far fa-heart text-gray-400 text-lg"></i>
+                            </button>
+                            <button onclick="showAnalysis()" class="w-10 h-10 rounded-full flex items-center justify-center hover:bg-blue-100 transition">
+                                <i class="fas fa-lightbulb text-gray-400 text-lg"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <h2 class="text-lg lg:text-xl font-bold text-gray-800 mb-6 leading-relaxed" id="questionText">
+                        题目加载中...
+                    </h2>
+
+                    <div class="space-y-3" id="optionsContainer">
+                        <!-- Options will be inserted here -->
+                    </div>
+
+                    <div id="answerFeedback" class="hidden mt-6 p-4 rounded-xl">
+                        <div class="flex items-center space-x-2 mb-2">
+                            <i id="feedbackIcon" class="text-xl"></i>
+                            <span id="feedbackText" class="font-bold"></span>
+                        </div>
+                        <p id="correctAnswer" class="text-sm text-gray-600"></p>
+                    </div>
+
+                    <div id="analysisSection" class="hidden mt-6 p-4 bg-blue-50 rounded-xl">
+                        <h4 class="font-bold text-blue-800 mb-2">
+                            <i class="fas fa-info-circle mr-2"></i>题目解析
+                        </h4>
+                        <p id="analysisText" class="text-sm text-blue-700"></p>
+                    </div>
+                </div>
+
+                <!-- Navigation Buttons -->
+                <div class="flex items-center justify-between mb-6">
+                    <button onclick="prevQuestion()" id="prevBtn" class="flex items-center space-x-2 bg-gray-100 hover:bg-gray-200 text-gray-700 px-6 py-3 rounded-xl transition">
+                        <i class="fas fa-chevron-left"></i>
+                        <span>上一题</span>
+                    </button>
+
+                    <div class="flex items-center space-x-2">
+                        <button onclick="submitAnswer()" id="submitBtn" class="btn-primary text-white px-8 py-3 rounded-xl font-bold">
+                            <i class="fas fa-check mr-2"></i>提交答案
+                        </button>
+                        <button onclick="nextQuestion()" id="nextBtn" class="btn-success text-white px-8 py-3 rounded-xl font-bold hidden">
+                            <span>下一题</span>
+                            <i class="fas fa-chevron-right ml-2"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="glass-card rounded-xl p-4 mb-6">
+                    <div class="flex flex-wrap items-center justify-center gap-3">
+                        <button onclick="switchMode('sequential')" class="flex items-center space-x-2 bg-purple-100 text-purple-700 px-4 py-2 rounded-lg hover:bg-purple-200 transition">
+                            <i class="fas fa-list-ol"></i>
+                            <span class="text-sm">顺序</span>
+                        </button>
+                        <button onclick="switchMode('random')" class="flex items-center space-x-2 bg-blue-100 text-blue-700 px-4 py-2 rounded-lg hover:bg-blue-200 transition">
+                            <i class="fas fa-random"></i>
+                            <span class="text-sm">随机</span>
+                        </button>
+                        <button onclick="switchMode('wrong')" class="flex items-center space-x-2 bg-red-100 text-red-700 px-4 py-2 rounded-lg hover:bg-red-200 transition">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <span class="text-sm">错题</span>
+                        </button>
+                        <button onclick="switchMode('exam')" class="flex items-center space-x-2 bg-green-100 text-green-700 px-4 py-2 rounded-lg hover:bg-green-200 transition">
+                            <i class="fas fa-file-alt"></i>
+                            <span class="text-sm">考试</span>
+                        </button>
+                        <button onclick="resetProgress()" class="flex items-center space-x-2 bg-gray-100 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-200 transition">
+                            <i class="fas fa-redo"></i>
+                            <span class="text-sm">重置</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Question Grid -->
+                <div class="glass-card rounded-xl p-4 lg:p-6">
+                    <h3 class="font-bold text-gray-700 mb-4">
+                        <i class="fas fa-th mr-2"></i>题目导航
+                    </h3>
+                    <div class="grid grid-cols-10 sm:grid-cols-15 md:grid-cols-20 lg:grid-cols-25 gap-2" id="questionGrid">
+                        <!-- Question grid will be inserted here -->
+                    </div>
+                    <div class="flex items-center justify-center space-x-4 mt-4 text-xs text-gray-500">
+                        <div class="flex items-center space-x-1">
+                            <div class="w-4 h-4 bg-green-500 rounded"></div>
+                            <span>正确</span>
+                        </div>
+                        <div class="flex items-center space-x-1">
+                            <div class="w-4 h-4 bg-red-500 rounded"></div>
+                            <span>错误</span>
+                        </div>
+                        <div class="flex items-center space-x-1">
+                            <div class="w-4 h-4 bg-gray-300 rounded"></div>
+                            <span>未答</span>
+                        </div>
+                        <div class="flex items-center space-x-1">
+                            <div class="w-4 h-4 bg-purple-500 rounded"></div>
+                            <span>当前</span>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Profile Modal -->
+    <div id="profileModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center p-4">
+        <div class="glass-card rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+            <div class="p-6">
+                <div class="flex items-center justify-between mb-6">
+                    <h2 class="text-2xl font-bold text-gray-800">
+                        <i class="fas fa-chart-line mr-2 text-purple-500"></i>学习统计
+                    </h2>
+                    <button onclick="closeProfile()" class="w-10 h-10 rounded-full hover:bg-gray-100 flex items-center justify-center">
+                        <i class="fas fa-times text-gray-500"></i>
+                    </button>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4 mb-6">
+                    <div class="bg-gradient-to-r from-purple-500 to-indigo-500 rounded-xl p-4 text-white">
+                        <p class="text-sm opacity-80">总答题数</p>
+                        <p class="text-3xl font-bold" id="profileTotal">0</p>
+                    </div>
+                    <div class="bg-gradient-to-r from-green-500 to-teal-500 rounded-xl p-4 text-white">
+                        <p class="text-sm opacity-80">正确率</p>
+                        <p class="text-3xl font-bold" id="profileAccuracy">0%</p>
+                    </div>
+                    <div class="bg-gradient-to-r from-red-500 to-pink-500 rounded-xl p-4 text-white">
+                        <p class="text-sm opacity-80">错题数</p>
+                        <p class="text-3xl font-bold" id="profileWrong">0</p>
+                    </div>
+                    <div class="bg-gradient-to-r from-yellow-500 to-orange-500 rounded-xl p-4 text-white">
+                        <p class="text-sm opacity-80">连续天数</p>
+                        <p class="text-3xl font-bold" id="profileStreak">0</p>
+                    </div>
+                </div>
+
+                <div class="mb-6">
+                    <h3 class="font-bold text-gray-700 mb-4">每日答题趋势</h3>
+                    <div class="bg-gray-50 rounded-xl p-4 h-48 flex items-end justify-between space-x-1" id="dailyChart">
+                        <!-- Chart bars will be inserted here -->
+                    </div>
+                </div>
+
+                <div class="mb-6">
+                    <h3 class="font-bold text-gray-700 mb-4">薄弱知识点</h3>
+                    <div id="weakPoints" class="space-y-2">
+                        <!-- Weak points will be inserted here -->
+                    </div>
+                </div>
+
+                <button onclick="exportData()" class="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 py-3 rounded-xl transition">
+                    <i class="fas fa-download mr-2"></i>导出学习数据
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Exam Result Modal -->
+    <div id="examResultModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center p-4">
+        <div class="glass-card rounded-2xl w-full max-w-md">
+            <div class="p-6 text-center">
+                <div class="w-24 h-24 bg-gradient-to-r from-purple-500 to-indigo-500 rounded-full mx-auto mb-4 flex items-center justify-center pulse">
+                    <i class="fas fa-trophy text-white text-4xl"></i>
+                </div>
+                <h2 class="text-2xl font-bold text-gray-800 mb-2">考试完成！</h2>
+                <p class="text-gray-500 mb-6">你的考试成绩如下</p>
+
+                <div class="grid grid-cols-2 gap-4 mb-6">
+                    <div class="bg-gray-50 rounded-xl p-4">
+                        <p class="text-sm text-gray-500">得分</p>
+                        <p class="text-3xl font-bold text-purple-600" id="examScore">0</p>
+                    </div>
+                    <div class="bg-gray-50 rounded-xl p-4">
+                        <p class="text-sm text-gray-500">正确率</p>
+                        <p class="text-3xl font-bold text-green-600" id="examAccuracy">0%</p>
+                    </div>
+                </div>
+
+                <div class="flex space-x-3">
+                    <button onclick="reviewExamWrong()" class="flex-1 bg-red-100 text-red-700 py-3 rounded-xl hover:bg-red-200 transition">
+                        <i class="fas fa-exclamation-triangle mr-2"></i>查看错题
+                    </button>
+                    <button onclick="closeExamResult(); switchMode('exam')" class="flex-1 btn-primary text-white py-3 rounded-xl">
+                        <i class="fas fa-redo mr-2"></i>再考一次
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed bottom-4 right-4 bg-gray-800 text-white px-6 py-3 rounded-xl shadow-lg transform translate-y-20 opacity-0 transition-all duration-300 z-50">
+        <div class="flex items-center space-x-2">
+            <i id="toastIcon" class="fas fa-check-circle"></i>
+            <span id="toastMessage">操作成功</span>
+        </div>
+    </div>
+
+    <script>
+// Psychology Quiz Questions - Auto Generated
+const QUESTIONS = [
   {
     "id": 2,
     "question": "\"我是男生\"，这个自我认知属于（）。",
@@ -9,16 +658,6 @@
       "D": "过渡性"
     },
     "answer": "B"
-  },
-  {
-    "id": 4,
-    "question": "课题分离理论强调将讨论的焦点放在（）本身。",
-    "options": {
-      "A": "人际关系",
-      "B": "解决方案",
-      "C": "个人"
-    },
-    "answer": "D"
   },
   {
     "id": 5,
@@ -52,17 +691,6 @@
       "D": "抑制多巳胺"
     },
     "answer": "B"
-  },
-  {
-    "id": 8,
-    "question": "情绪反应的性质与刺激相符是指（）。",
-    "options": {
-      "A": "正性的刺激引起情绪反应；负性的刺激不引起情绪反应",
-      "B": "正性的刺激不引起情绪反应；负性的刺激引起情绪反应",
-      "C": "正性的刺激引起负性的情绪反应；负性的刺激引起正性的情绪反应",
-      "D": "正性的刺激引起正性的情绪反应；负性的刺激引起负性的情绪反应 答案：D"
-    },
-    "answer": ""
   },
   {
     "id": 9,
@@ -151,16 +779,6 @@
       "D": "肌动变异性"
     },
     "answer": "B"
-  },
-  {
-    "id": 27,
-    "question": "受，喜怒不形于色\"的影响，有些人强踪欢笑，这是不接纳情绪中的O表现C",
-    "options": {
-      "A": "为将来焦虑",
-      "B": "不承认现实",
-      "D": "极力隐藏自己的情绪"
-    },
-    "answer": "D"
   },
   {
     "id": 28,
@@ -328,16 +946,6 @@
     "answer": "D"
   },
   {
-    "id": 44,
-    "question": "下列哪种姿势最常被解读为\"无可奈何\"？",
-    "options": {
-      "A": "双手外摊",
-      "B": "双臂外展",
-      "C": "手外推"
-    },
-    "answer": "A"
-  },
-  {
     "id": 45,
     "question": "压力导致\"突然出现座疮\"的原因是？",
     "options": {
@@ -347,16 +955,6 @@
       "D": "过敏"
     },
     "answer": "B"
-  },
-  {
-    "id": 46,
-    "question": "\"在社交场合能很好地管理自己，有良好的人际交往能力\"是对于（）特质的描述“ A:社交智慧",
-    "options": {
-      "B": "热情",
-      "C": "乐观",
-      "D": "领导力"
-    },
-    "answer": "A"
   },
   {
     "id": 47,
@@ -432,16 +1030,6 @@
       "B": "《咨询心理学手册》",
       "C": "《心理学百科全书》",
       "D": "《职业名称词典》"
-    },
-    "answer": "C"
-  },
-  {
-    "id": 56,
-    "question": "下列不属于爱情三角理论成分的是?",
-    "options": {
-      "A": "亲密",
-      "B": "激情",
-      "D": "承诺"
     },
     "answer": "C"
   },
@@ -587,16 +1175,6 @@
       "D": "社会学习"
     },
     "answer": "C"
-  },
-  {
-    "id": 73,
-    "question": "男女感知差异中，女性对哪种感受更敏感？",
-    "options": {
-      "A": "疼痛",
-      "C": "空间能力",
-      "D": "逻辑推理"
-    },
-    "answer": "A"
   },
   {
     "id": 74,
@@ -771,16 +1349,6 @@
       "B": "寻求帮助",
       "C": "认知重构",
       "D": "逃避现实"
-    },
-    "answer": "D"
-  },
-  {
-    "id": 90,
-    "question": "弗洛伊德将人格中的自我分为本我、自我和超我，其中O遵循快乐原则。",
-    "options": {
-      "A": "自我",
-      "B": "主我",
-      "D": "本我"
     },
     "answer": "D"
   },
@@ -972,16 +1540,6 @@
     "answer": "D"
   },
   {
-    "id": 202,
-    "question": "单向沟通的缺点不包括：",
-    "options": {
-      "B": "难以辨别信息正误",
-      "C": "信息准确性较差",
-      "D": "易产生挫折和抗拒心理"
-    },
-    "answer": "A"
-  },
-  {
     "id": 203,
     "question": "人格测评在个人发展中的作用不包括：",
     "options": {
@@ -1048,16 +1606,6 @@
     "answer": "B"
   },
   {
-    "id": 209,
-    "question": "依据埃利斯的ABC理论，对于自身不合理认知的矫正关键在于O环节。",
-    "options": {
-      "A": "诱发事件A",
-      "C": "结果C",
-      "D": "以上全部 答案：B"
-    },
-    "answer": ""
-  },
-  {
     "id": 210,
     "question": "成长型心态认为能力是？",
     "options": {
@@ -1065,16 +1613,6 @@
       "B": "判断状态与环境是否匹配",
       "C": "与过去比较",
       "D": "与理想比较"
-    },
-    "answer": "B"
-  },
-  {
-    "id": 212,
-    "question": "\"创伤后成长\"的大脑机制与哪个脑区相关？",
-    "options": {
-      "A": "杏仁核",
-      "B": "海马体",
-      "D": "小脑"
     },
     "answer": "B"
   },
@@ -1299,16 +1837,6 @@
     "answer": "B"
   },
   {
-    "id": 235,
-    "question": "产生心理活动的物质基础是（）。",
-    "options": {
-      "A": "实践活动",
-      "C": "客观现实",
-      "D": "大脑"
-    },
-    "answer": "D"
-  },
-  {
     "id": 236,
     "question": "网络成瘾的\"心理依赖\"表现为？",
     "options": {
@@ -1373,16 +1901,6 @@
       "D": "客观表现"
     },
     "answer": "B"
-  },
-  {
-    "id": 242,
-    "question": "先把问题放置一边，使头脑得到休息，从而有利于冷静地思考以往的得失和被忽 略的线索，有利于思维从不同角度出击。这是非逻辑思维培养中的O O A:加大思维的联想跨度",
-    "options": {
-      "B": "加大思维的前进跨度",
-      "C": "加大思维的转换跨度",
-      "D": "加大思维的省略跨度"
-    },
-    "answer": "C"
   },
   {
     "id": 243,
@@ -1638,16 +2156,6 @@
     "answer": "C"
   },
   {
-    "id": 268,
-    "question": "（）的变化可以表达疑问或强调。",
-    "options": {
-      "A": "语速",
-      "B": "节奏",
-      "C": "首同"
-    },
-    "answer": "C"
-  },
-  {
     "id": 269,
     "question": "以下哪一项不是探索负性情绪背后需要的方法？",
     "options": {
@@ -1723,16 +2231,6 @@
       "D": "心理现象完全独立于社会文化背景"
     },
     "answer": "B"
-  },
-  {
-    "id": 276,
-    "question": "行为主义心理学的正式创立与以下哪位心理学家密切相关？",
-    "options": {
-      "A": "约翰•华生",
-      "C": "阿尔弗雷络阿德勒",
-      "D": "亚伯拉罕马斯洛"
-    },
-    "answer": "A"
   },
   {
     "id": 277,
@@ -1944,16 +2442,6 @@
     "answer": "B"
   },
   {
-    "id": 297,
-    "question": "欣喜若狂、暴跳如雷等属于O情绪状态C",
-    "options": {
-      "A": "心境障碍",
-      "C": "应激",
-      "D": "激情"
-    },
-    "answer": "D"
-  },
-  {
     "id": 298,
     "question": "（）指的是对风险的严重程度和发生可能性的评估C",
     "options": {
@@ -2053,26 +2541,6 @@
     "answer": "C"
   },
   {
-    "id": 308,
-    "question": "游泳对身体的好处是？",
-    "options": {
-      "A": "增加关节压力",
-      "B": "减轻关节压力",
-      "C": "降低心肺功能"
-    },
-    "answer": "B"
-  },
-  {
-    "id": 309,
-    "question": "正性压力的作用是？",
-    "options": {
-      "A": "降低效率",
-      "C": "提升效率",
-      "D": "导致焦虑"
-    },
-    "answer": "C"
-  },
-  {
     "id": 310,
     "question": "（），是一种深刻的自我认知与珍视。它要求个体无条件地认可自己的全部，不 论外界如何评价，不论自己表现如何C",
     "options": {
@@ -2082,16 +2550,6 @@
       "D": "成年期"
     },
     "answer": "A"
-  },
-  {
-    "id": 312,
-    "question": "生命观的核心问题是？",
-    "options": {
-      "A": "\"如何赚钱\"",
-      "B": "\"为何而活\"",
-      "D": "\"如何享乐\""
-    },
-    "answer": "B"
   },
   {
     "id": 313,
@@ -2271,7 +2729,7 @@
   },
   {
     "id": 332,
-    "question": "科胡特认为，U是一种借助胜任经验而产生的真正的自我价值感，是一种认为",
+    "question": "科胡特认为，U是一种借助胜任经验而产生的真正的自我价值感，是一种认为 自己值得珍惜、保护的真实感觉。",
     "options": {
       "A": "自尊",
       "B": "自信",
@@ -2380,16 +2838,6 @@
     "answer": "C"
   },
   {
-    "id": 344,
-    "question": "按照沟通是否形成反馈回路，作报告属于（）沟通类型，",
-    "options": {
-      "A": "单向沟通",
-      "C": "非语言沟通",
-      "D": "语言沟通"
-    },
-    "answer": "A"
-  },
-  {
     "id": 345,
     "question": "\"深呼吸与冥想\"用于应对？",
     "options": {
@@ -2399,16 +2847,6 @@
       "D": "忽视感受"
     },
     "answer": "B"
-  },
-  {
-    "id": 346,
-    "question": "在童年期，自我意识的发展更多地依赖于什么？",
-    "options": {
-      "A": "语言和社会交往能力的提升。",
-      "B": "生理上的快速成长O",
-      "D": "情感上的独立性C"
-    },
-    "answer": "A"
   },
   {
     "id": 347,
@@ -2543,28 +2981,8 @@
     "answer": "B"
   },
   {
-    "id": 360,
-    "question": "当一个人的正性情绪O负性情绪时，他的主导心境就是愉快的。",
-    "options": {
-      "B": "等于",
-      "C": "少于",
-      "D": "不多于"
-    },
-    "answer": "A"
-  },
-  {
-    "id": 361,
-    "question": "\"战斗或逃跑\"反应由哪位科学家提出？",
-    "options": {
-      "A": "汉斯•塞里",
-      "B": "沃尔特•坎农",
-      "D": "艾利斯"
-    },
-    "answer": "B"
-  },
-  {
     "id": 362,
-    "question": "个体想着不要紧张，却因为该念头在内心的投射而引发心理、生理和行为上的紧",
+    "question": "个体想着不要紧张，却因为该念头在内心的投射而引发心理、生理和行为上的紧 张表现，这是O O",
     "options": {
       "A": "投射效应",
       "B": "间隔效应",
@@ -2627,16 +3045,6 @@
       "D": "疲劳抑制行为"
     },
     "answer": "A"
-  },
-  {
-    "id": 370,
-    "question": "\"要是我不这么烦恼，那多好\"，这是不接纳情绪中的O表现。",
-    "options": {
-      "A": "极力控制自己的情绪",
-      "B": "为将来焦虑",
-      "C": "不承认现实"
-    },
-    "answer": "C"
   },
   {
     "id": 371,
@@ -2725,16 +3133,6 @@
       "D": "思考（T） /情感（F）"
     },
     "answer": "D"
-  },
-  {
-    "id": 379,
-    "question": "被称为\"压力之父\"的科学家是？",
-    "options": {
-      "A": "弗洛伊德",
-      "B": "汉斯•塞里",
-      "D": "坎农"
-    },
-    "answer": "B"
   },
   {
     "id": 380,
@@ -2836,16 +3234,6 @@
     "answer": "D"
   },
   {
-    "id": 389,
-    "question": "以下哪一阶段的自我意识主要表现为个体开始理解自己与他人的关系？",
-    "options": {
-      "A": "原始自我意识",
-      "B": "社会自我意识",
-      "C": "独立自我意识"
-    },
-    "answer": "B"
-  },
-  {
     "id": 390,
     "question": "（）左右，儿童开始出现羞耻感、占有心和独立意愿，自我意识有了新的发展。",
     "options": {
@@ -2899,16 +3287,6 @@
       "D": "思考迅速，但准确性高"
     },
     "answer": "A"
-  },
-  {
-    "id": 397,
-    "question": "\"社交媒体依赖转化\"的关键是？",
-    "options": {
-      "A": "单一方法",
-      "B": "综合施策",
-      "C": "放任不管"
-    },
-    "answer": "B"
   },
   {
     "id": 398,
@@ -2997,15 +3375,6 @@
       "D": "避免绝对化、灾难化的认知"
     },
     "answer": "B"
-  },
-  {
-    "id": 407,
-    "question": "（）指人对某种意外的环境刺激所做出的适应性反应，在突如其来的紧急条件下, 需要迅速地做出决定的时刻，必须集中自己的智慧和经验，动员自己的全部力量，迅速做出 选择，采取有效行动。",
-    "options": {
-      "A": "心境障碍",
-      "C": "应激"
-    },
-    "answer": "C"
   },
   {
     "id": 408,
@@ -3149,16 +3518,6 @@
       "D": "降低专注力"
     },
     "answer": "B"
-  },
-  {
-    "id": 425,
-    "question": "以下哪一项不是想象放松法的关键？",
-    "options": {
-      "A": "引发注意力分散的状态",
-      "B": "清晰的处境",
-      "D": "迸入放松状态"
-    },
-    "answer": "A"
   },
   {
     "id": 426,
@@ -3579,16 +3938,6 @@
     "answer": "D"
   },
   {
-    "id": 467,
-    "question": "大五人格特质中的（）得分高代表乐于助人、可靠且富有同情心，得分低者则表 现出敌对意识、多疑。",
-    "options": {
-      "A": "内外向性",
-      "B": "宜人性",
-      "D": "神经质"
-    },
-    "answer": "B"
-  },
-  {
     "id": 468,
     "question": "改善害羞和社交恐惧，主要是要O o",
     "options": {
@@ -3642,16 +3991,6 @@
       "D": "完全由遗传决定"
     },
     "answer": "A"
-  },
-  {
-    "id": 474,
-    "question": "明明已经很生气，却在心里无数次命令自己\"不要生气了\"，这是在（）o",
-    "options": {
-      "A": "为现实焦虑",
-      "B": "极力控制自己的情绪",
-      "D": "不承认现实"
-    },
-    "answer": "B"
   },
   {
     "id": 475,
@@ -3863,16 +4202,6 @@
     "answer": "B"
   },
   {
-    "id": 496,
-    "question": "以下不属于社会支持系统的组成部分的是O O",
-    "options": {
-      "A": "家人",
-      "C": "心理咨询师",
-      "D": "竞争对手"
-    },
-    "answer": "D"
-  },
-  {
     "id": 497,
     "question": "正性压力与负性压力的区别在于？",
     "options": {
@@ -4047,16 +4376,6 @@
       "D": "人格的特色部分"
     },
     "answer": "A"
-  },
-  {
-    "id": 517,
-    "question": "下列属于发展性心理危机的是？",
-    "options": {
-      "A": "地震创伤",
-      "C": "升学压力",
-      "D": "暴力侵犯"
-    },
-    "answer": "C"
   },
   {
     "id": 518,
@@ -4244,26 +4563,6 @@
       "D": "提升沟通"
     },
     "answer": "B"
-  },
-  {
-    "id": 540,
-    "question": "压力激活的\"HPA轴\"不包括哪个腺体？",
-    "options": {
-      "A": "下丘脑",
-      "C": "肾上腺",
-      "D": "甲状腺"
-    },
-    "answer": "D"
-  },
-  {
-    "id": 541,
-    "question": "SQ3R阅读法的第一个步骤是：",
-    "options": {
-      "B": "阅读",
-      "C": "提问",
-      "D": "复述"
-    },
-    "answer": "A"
   },
   {
     "id": 542,
@@ -4508,16 +4807,6 @@
     "answer": "A"
   },
   {
-    "id": 566,
-    "question": "（），婴儿开始产生自我意识的萌芽，即能意识到自己的身体和外部世界的边 界，听到别人叫自己的名字，会知道是在叫自己C",
-    "options": {
-      "A": "6个月后",
-      "B": "7个月后",
-      "C": "8个月后"
-    },
-    "answer": "C"
-  },
-  {
     "id": 567,
     "question": "恐惧型依恋的人在亲密关系中会？",
     "options": {
@@ -4538,16 +4827,6 @@
       "D": "指导-调节理论"
     },
     "answer": "A"
-  },
-  {
-    "id": 569,
-    "question": "大学生心理发展中，以下哪种能力会显著提高？",
-    "options": {
-      "A": "机械记忆能力",
-      "C": "被动接受能力",
-      "D": "情绪稳定性"
-    },
-    "answer": "B"
   },
   {
     "id": 570,
@@ -4612,16 +4891,6 @@
       "B": "温暖支持",
       "C": "放任不管",
       "D": "积极沟通"
-    },
-    "answer": "C"
-  },
-  {
-    "id": 576,
-    "question": "对失败事件归因于（），那么自己会感到沮丧、丧失信心。",
-    "options": {
-      "A": "不稳定因素",
-      "C": "内部",
-      "D": "外部"
     },
     "answer": "C"
   },
@@ -4714,16 +4983,6 @@
     "answer": "C"
   },
   {
-    "id": 585,
-    "question": "情绪本身不是问题，情绪是人们生命中不可分割的一部分，它是来告诉人们（） A:需要避免情绪的产生",
-    "options": {
-      "B": "生活中有些事情出现了，需要去处理",
-      "C": "需要压抑情绪",
-      "D": "需要发泄情绪"
-    },
-    "answer": "B"
-  },
-  {
     "id": 586,
     "question": "长时间独自在家看电视、玩游戏等，减少了与他人面对面交流的机会，从而加剧 了害羞情绪，这属于（）因素：：",
     "options": {
@@ -4744,16 +5003,6 @@
       "D": "熬夜玩"
     },
     "answer": "B"
-  },
-  {
-    "id": 588,
-    "question": "埃利斯的ABC理论中的\"B\"代表是（）?",
-    "options": {
-      "A": "诱发事件",
-      "B": "结果",
-      "D": "情绪"
-    },
-    "answer": "C"
   },
   {
     "id": 589,
@@ -4778,16 +5027,6 @@
     "answer": "C"
   },
   {
-    "id": 592,
-    "question": "挫折的\"归因偏差\"可能导致？",
-    "options": {
-      "A": "客观评价",
-      "B": "自我否定",
-      "C": "积极行动"
-    },
-    "answer": "B"
-  },
-  {
     "id": 593,
     "question": "下列研究领域中，哪一个最关注人类如何在社会环境中互动和影响他人？",
     "options": {
@@ -4795,16 +5034,6 @@
       "B": "社会心理学",
       "C": "生理心理学",
       "D": "临床心理学"
-    },
-    "answer": "B"
-  },
-  {
-    "id": 594,
-    "question": "\"我想象自己在他人心目中的形象\"属于哪种自我观念？",
-    "options": {
-      "A": "现实我",
-      "B": "投射我（镜中我）",
-      "C": "理想我"
     },
     "answer": "B"
   },
@@ -4829,16 +5058,6 @@
       "D": "忽视自我"
     },
     "answer": "B"
-  },
-  {
-    "id": 597,
-    "question": "儿童在（）左右开始形成自我意识，这是心理发展的重要里程碑,",
-    "options": {
-      "A": "6个月",
-      "C": "2岁",
-      "D": "3岁"
-    },
-    "answer": "C"
   },
   {
     "id": 598,
@@ -4930,7 +5149,7 @@
   },
   {
     "id": 609,
-    "question": "O能让大学生学会如何在专业环境中表达自己的观点、如何有效地与教授和行",
+    "question": "O能让大学生学会如何在专业环境中表达自己的观点、如何有效地与教授和行 业专家迸行沟通.",
     "options": {
       "A": "非正式交往",
       "B": "正式交往",
@@ -4995,16 +5214,6 @@
     "answer": "C"
   },
   {
-    "id": 616,
-    "question": "不属于不接纳情绪表现的是（）o",
-    "options": {
-      "A": "不承认现实",
-      "C": "愤怒",
-      "D": "为将来焦虑"
-    },
-    "answer": "C"
-  },
-  {
     "id": 617,
     "question": "（）是指人们倾向于把对将来的估计和已采用过的估计联系起来，同时易受他人 建议的影响。",
     "options": {
@@ -5014,16 +5223,6 @@
       "D": "包摄"
     },
     "answer": "B"
-  },
-  {
-    "id": 618,
-    "question": "自我提问问题：\"该问题要求我干什么？它涉及哪方面的知识？\"，这是处于O 阶段。",
-    "options": {
-      "A": "理解问题",
-      "C": "执行计划",
-      "D": "回顾"
-    },
-    "answer": "A"
   },
   {
     "id": 619,
@@ -5090,16 +5289,6 @@
       "D": "情绪低落"
     },
     "answer": "B"
-  },
-  {
-    "id": 625,
-    "question": "当你发现有人和你一样热爱摄影、痴迷于某个乐队，或者对同一个学术领域充满 热情时，你们之间的友谊就自然而然地神下了一颗种子。这是人际吸引规律中的O O A:能力才华吸引",
-    "options": {
-      "B": "互补吸引",
-      "C": "邻近吸引",
-      "D": "相似吸引"
-    },
-    "answer": "D"
   },
   {
     "id": 626,
@@ -5355,16 +5544,6 @@
     "answer": "B"
   },
   {
-    "id": 649,
-    "question": "当你在课堂上发表了一段深刻的见解，或者在舞台上表演了一段精彩的独奏，让 你在同学中脱颖而出，吸引到那些欣赏你的朋友:：这是人际吸引规律中的O O A:能力才华吸引",
-    "options": {
-      "B": "个性品质吸引",
-      "C": "邻近吸引",
-      "D": "相似吸引"
-    },
-    "answer": "A"
-  },
-  {
     "id": 650,
     "question": "生命的创造性体现在？",
     "options": {
@@ -5618,15 +5797,6 @@
     "answer": "B"
   },
   {
-    "id": 675,
-    "question": "只要人们处在清醒状态下，（）随时随地都会发生，这是人的生存适应的一个重 要方面：＞",
-    "options": {
-      "A": "初评价",
-      "B": "次评价 C:再评价 D:终评价 答案：A"
-    },
-    "answer": ""
-  },
-  {
     "id": 676,
     "question": "以下哪一项最能体现现代社会中\"告别权力者\"心理问题的特点？",
     "options": {
@@ -5693,16 +5863,6 @@
     "answer": "D"
   },
   {
-    "id": 683,
-    "question": "根据霍尔提出的人际距离带，保镖的距离带为O o",
-    "options": {
-      "A": "0-0.5 米",
-      "B": "0-0.25 米",
-      "C": "0.25 - 0.5 米"
-    },
-    "answer": "A"
-  },
-  {
     "id": 684,
     "question": "有效的时间管理黄略不包括：",
     "options": {
@@ -5710,16 +5870,6 @@
       "B": "经常变动学习场所",
       "C": "确立切合实际的目标",
       "D": "分清任务轻重缓急"
-    },
-    "answer": "B"
-  },
-  {
-    "id": 685,
-    "question": "以下哪一项不是理性想法的特征？",
-    "options": {
-      "A": "客观事实",
-      "C": "积极面对困难",
-      "D": "摆脱情绪困扰"
     },
     "answer": "B"
   },
@@ -5900,16 +6050,6 @@
     "answer": "B"
   },
   {
-    "id": 703,
-    "question": "\"肯定的语言\"作为爱的语言，具体表现为？",
-    "options": {
-      "A": "批评",
-      "B": "赞美",
-      "C": "沉默"
-    },
-    "answer": "B"
-  },
-  {
     "id": 704,
     "question": "消极解释风格的人将失败归为？",
     "options": {
@@ -6075,16 +6215,6 @@
     "answer": "B"
   },
   {
-    "id": 723,
-    "question": "负性压力的作用是？",
-    "options": {
-      "A": "提升效率",
-      "B": "激发潜能",
-      "D": "促进成长"
-    },
-    "answer": "C"
-  },
-  {
     "id": 724,
     "question": "以下选项中哪一项不属于品味成长的具体方法？",
     "options": {
@@ -6180,16 +6310,6 @@
       "B": "不发动态",
       "C": "频繁发布求关注",
       "D": "隐私保护"
-    },
-    "answer": "C"
-  },
-  {
-    "id": 734,
-    "question": "认知负荷理论认为，有效的学习环境应通过优化多种负荷来促进信息处理和学习 效率，特别是减少不必要的O ,使学习者能够将精力集中在O上，即深度处理学习内容。 A:内部负荷，相芒负荷",
-    "options": {
-      "B": "内部负荷，有效负荷",
-      "C": "外部负荷，相关负荷",
-      "D": "外部负荷，有效负荷"
     },
     "answer": "C"
   },
@@ -6337,16 +6457,6 @@
     "answer": "B"
   },
   {
-    "id": 749,
-    "question": "安全型依恋的人对他人的态度是？",
-    "options": {
-      "A": "怀疑",
-      "C": "恐惧",
-      "D": "回避"
-    },
-    "answer": "B"
-  },
-  {
     "id": 750,
     "question": "尽可能多地说出砖头的用途：装修、挡车轮、做标记、垫脚、写字、压东西等, 这是发散思维训练中的O。",
     "options": {
@@ -6433,16 +6543,6 @@
       "D": "认知风格"
     },
     "answer": "B"
-  },
-  {
-    "id": 764,
-    "question": "网络成瘾对职业的影响是？",
-    "options": {
-      "B": "职业发展",
-      "C": "任务出错",
-      "D": "信任增强"
-    },
-    "answer": "C"
   },
   {
     "id": 765,
@@ -6619,16 +6719,6 @@
       "D": "相符合，且处于较低水平"
     },
     "answer": "C"
-  },
-  {
-    "id": 786,
-    "question": "学习拖延不仅影响学生的学业成绩和主观幸福感，更会导致一系列心理健康问题, 以下哪一项心理健康问题不是由学习拖延导致的？ A:学习焦虑",
-    "options": {
-      "B": "精神分裂",
-      "C": "自我厌恶",
-      "D": "抑郁"
-    },
-    "answer": "B"
   },
   {
     "id": 787,
@@ -6841,7 +6931,7 @@
   },
   {
     "id": 809,
-    "question": "当意识到错失或伤害了别人后可能会产生O ,而在人们承认自己做错了什么后,",
+    "question": "当意识到错失或伤害了别人后可能会产生O ,而在人们承认自己做错了什么后, 今后就会更加清晰地知道什么是对的C",
     "options": {
       "A": "愤怒",
       "B": "悲伤",
@@ -6871,16 +6961,6 @@
       "D": "倾向于关注未来的可能性"
     },
     "answer": "A"
-  },
-  {
-    "id": 813,
-    "question": "失恋调适的方法不包括？",
-    "options": {
-      "A": "倾诉",
-      "C": "报复",
-      "D": "疏通"
-    },
-    "answer": "C"
   },
   {
     "id": 814,
@@ -7037,16 +7117,6 @@
     "answer": "B"
   },
   {
-    "id": 829,
-    "question": "自我提问问题：\"解题有无多余步骤和环节？结果正确吗？该题有无简便方法？\", 这是处于O阶段C",
-    "options": {
-      "A": "理解问题",
-      "C": "执行计划",
-      "D": "回顾"
-    },
-    "answer": "D"
-  },
-  {
     "id": 830,
     "question": "教师先让学生根据自己的预设观念解决一个科学问题，然后通过实验或提供科学 证据显示实际的结果与学生的预期不符，迫使学生重新评估和调整自己的理解，促进更深层 次的学习和理解，这是（）的应用。",
     "options": {
@@ -7078,16 +7148,6 @@
       "D": "增强心理弹性"
     },
     "answer": "D"
-  },
-  {
-    "id": 834,
-    "question": "人们往往会对初次接触的信息给予更多的重视，并且这些初次接触的信息会在人 的记忆中占据较为重要的位置，从而影响到后续信息的处理和整体印象的形成。这是O O A:近因效应",
-    "options": {
-      "B": "首因效应",
-      "C": "光环效应",
-      "D": "印象形成效应"
-    },
-    "answer": "B"
   },
   {
     "id": 835,
@@ -7399,7 +7459,7 @@
   },
   {
     "id": 867,
-    "question": "ABC理论中的\"B\"指的是？",
+    "question": "ABC理论中的\"B\"指的是？ A信念",
     "options": {
       "B": "提供来访者生活建议",
       "C": "帮助来访者理解自己和学习新行为",
@@ -7638,16 +7698,6 @@
       "D": "与环境比较"
     },
     "answer": "B"
-  },
-  {
-    "id": 894,
-    "question": "网络购物属于大学生网络使用的哪类？",
-    "options": {
-      "A": "信息获取",
-      "C": "购物",
-      "D": "娱乐"
-    },
-    "answer": "C"
   },
   {
     "id": 895,
@@ -7892,16 +7942,6 @@
     "answer": "D"
   },
   {
-    "id": 922,
-    "question": "自我提问问题：\"有必要修改或重新选择解题方法吗？解题步骤、数据计算有无 问题\"，这是处于O阶段，",
-    "options": {
-      "A": "理解问题",
-      "C": "执行计划",
-      "D": "回顾"
-    },
-    "answer": "C"
-  },
-  {
     "id": 923,
     "question": "关于保持感恩之心的描述正确的是：",
     "options": {
@@ -7924,16 +7964,6 @@
     "answer": "B"
   },
   {
-    "id": 925,
-    "question": "在分析人格特点时，可以参考的理论模型不包括：",
-    "options": {
-      "A": "人格五因素模型",
-      "C": "24项积极人格特质模型",
-      "D": "宿命思维模型"
-    },
-    "answer": "D"
-  },
-  {
     "id": 926,
     "question": "间隔复习利用了 O的原理，通过定期重温学习内容来对抗遗忘，从而加深记忆 的印象和理解的深度。",
     "options": {
@@ -7952,16 +7982,6 @@
       "B": "心理能量充沛",
       "C": "社会适应性",
       "D": "自我发展能力"
-    },
-    "answer": "B"
-  },
-  {
-    "id": 929,
-    "question": "\"喜欢是单纯的情绪体验，爱情伴随冲突情绪\"，这体现了爱与喜欢的哪点区别？ A:是否有性需求",
-    "options": {
-      "B": "情绪复杂性",
-      "C": "是否有承诺",
-      "D": "是否有亲密感"
     },
     "answer": "B"
   },
@@ -7997,16 +8017,6 @@
       "D": "1930 年"
     },
     "answer": "A"
-  },
-  {
-    "id": 933,
-    "question": "技术因素中，\"信息茧房\"由什么导致？如平台推送用户感兴趣的内容,使其沉迷。 A:人工筛选",
-    "options": {
-      "B": "随机推送",
-      "C": "推荐算法",
-      "D": "用户自选"
-    },
-    "answer": "C"
   },
   {
     "id": 934,
@@ -8219,7 +8229,7 @@
   },
   {
     "id": 961,
-    "question": "以自己的身体为中心，并以自己的想法和情绪来认识、投射外部世界，能分清，我\"",
+    "question": "以自己的身体为中心，并以自己的想法和情绪来认识、投射外部世界，能分清，我\" 与\"非我\"，但分不清我与物之间的关系“这是（）。",
     "options": {
       "A": "自我中心时期",
       "B": "身体中心时期",
@@ -8460,16 +8470,6 @@
     "answer": "B"
   },
   {
-    "id": 985,
-    "question": "爱情三角理论中，\"与伴侣心灵相近、互相契合\"属于哪个成分？",
-    "options": {
-      "A": "亲密",
-      "C": "承诺",
-      "D": "依恋"
-    },
-    "answer": "A"
-  },
-  {
     "id": 986,
     "question": "生物性生命的基础是？",
     "options": {
@@ -8488,16 +8488,6 @@
       "B": "攻击他人",
       "C": "发展其他优势",
       "D": "逃避现实"
-    },
-    "answer": "C"
-  },
-  {
-    "id": 988,
-    "question": "保证充足的睡眠，调节好自己的生物钟，经常锻炼身体，做到劳逸结合，这属于 （）准备。",
-    "options": {
-      "A": "时间",
-      "B": "睡眠",
-      "C": "身体"
     },
     "answer": "C"
   },
@@ -8611,4 +8601,1036 @@
     },
     "answer": "B"
   }
-]
+];
+
+</script>
+    <script>
+// ==========================================
+// Psychology Quiz App - Main Application
+// ==========================================
+
+// Global State
+let currentUser = null;
+let currentMode = 'sequential';
+let currentQuestionIndex = 0;
+let selectedOption = null;
+let isAnswered = false;
+let examQuestions = [];
+let examTimer = null;
+let examStartTime = null;
+let filteredQuestions = [...QUESTIONS];
+let rangeStart = 1;
+let rangeEnd = QUESTIONS.length;
+
+// ==========================================
+// Authentication Functions
+// ==========================================
+
+function getUsers() {
+    return JSON.parse(localStorage.getItem('psych_users') || '{}');
+}
+
+function saveUsers(users) {
+    localStorage.setItem('psych_users', JSON.stringify(users));
+}
+
+function getCurrentUser() {
+    const userId = localStorage.getItem('psych_current_user');
+    if (!userId) return null;
+    const users = getUsers();
+    return users[userId] || null;
+}
+
+function saveCurrentUser(user) {
+    const users = getUsers();
+    users[user.id] = user;
+    saveUsers(users);
+    localStorage.setItem('psych_current_user', user.id);
+}
+
+function showRegister() {
+    document.getElementById('loginForm').style.display = 'none';
+    document.getElementById('registerForm').style.display = 'block';
+    document.getElementById('authMessage').innerHTML = '';
+}
+
+function showLogin() {
+    document.getElementById('loginForm').style.display = 'block';
+    document.getElementById('registerForm').style.display = 'none';
+    document.getElementById('authMessage').innerHTML = '';
+}
+
+function showMessage(msg, type = 'error') {
+    const colors = {
+        error: 'text-red-500',
+        success: 'text-green-500',
+        info: 'text-blue-500'
+    };
+    document.getElementById('authMessage').innerHTML = `<p class="${colors[type] || colors.error}"><i class="fas fa-${type === 'error' ? 'exclamation-circle' : type === 'success' ? 'check-circle' : 'info-circle'} mr-1"></i>${msg}</p>`;
+}
+
+function login() {
+    const username = document.getElementById('loginUsername').value.trim();
+    const password = document.getElementById('loginPassword').value;
+
+    if (!username || !password) {
+        showMessage('请输入用户名和密码');
+        return;
+    }
+
+    const users = getUsers();
+    const userId = username.toLowerCase();
+
+    if (!users[userId]) {
+        showMessage('用户不存在，请先注册');
+        return;
+    }
+
+    if (users[userId].password !== password) {
+        showMessage('密码错误');
+        return;
+    }
+
+    currentUser = users[userId];
+    localStorage.setItem('psych_current_user', userId);
+    showMessage('登录成功！', 'success');
+    setTimeout(() => initApp(), 500);
+}
+
+function register() {
+    const username = document.getElementById('regUsername').value.trim();
+    const password = document.getElementById('regPassword').value;
+    const nickname = document.getElementById('regNickname').value.trim() || username;
+
+    if (!username || !password) {
+        showMessage('请输入用户名和密码');
+        return;
+    }
+
+    if (username.length < 2) {
+        showMessage('用户名至少2个字符');
+        return;
+    }
+
+    if (password.length < 4) {
+        showMessage('密码至少4个字符');
+        return;
+    }
+
+    const users = getUsers();
+    const userId = username.toLowerCase();
+
+    if (users[userId]) {
+        showMessage('用户名已存在');
+        return;
+    }
+
+    currentUser = {
+        id: userId,
+        username: username,
+        nickname: nickname,
+        password: password,
+        createdAt: new Date().toISOString(),
+        stats: {
+            totalAnswered: 0,
+            totalCorrect: 0,
+            totalWrong: 0,
+            wrongQuestions: [],
+            favorites: [],
+            answeredQuestions: {},
+            dailyStats: {},
+            streak: 0,
+            lastStudyDate: null,
+            points: 0,
+            examHistory: []
+        }
+    };
+
+    saveCurrentUser(currentUser);
+    showMessage('注册成功！', 'success');
+    setTimeout(() => initApp(), 500);
+}
+
+function logout() {
+    localStorage.removeItem('psych_current_user');
+    currentUser = null;
+    document.getElementById('mainApp').style.display = 'none';
+    document.getElementById('authPage').style.display = 'flex';
+    document.getElementById('loginUsername').value = '';
+    document.getElementById('loginPassword').value = '';
+}
+
+function checkAuth() {
+    const user = getCurrentUser();
+    if (user) {
+        currentUser = user;
+        initApp();
+    }
+}
+
+// ==========================================
+// App Initialization
+// ==========================================
+
+function initApp() {
+    document.getElementById('authPage').style.display = 'none';
+    document.getElementById('mainApp').style.display = 'block';
+
+    // Update UI with user info
+    document.getElementById('userDisplayName').textContent = currentUser.nickname;
+    document.getElementById('menuUsername').textContent = currentUser.nickname;
+    document.getElementById('menuUserStats').textContent = `已答 ${currentUser.stats.totalAnswered} 题`;
+
+    // Initialize stats
+    updateStats();
+    updateStreak();
+    updateBadges();
+
+    // Load first question
+    loadQuestion();
+    renderQuestionGrid();
+}
+
+// ==========================================
+// Stats & UI Updates
+// ==========================================
+
+function updateStats() {
+    const stats = currentUser.stats;
+    const accuracy = stats.totalAnswered > 0 ? Math.round((stats.totalCorrect / stats.totalAnswered) * 100) : 0;
+
+    document.getElementById('statCompleted').textContent = stats.totalAnswered;
+    document.getElementById('statAccuracy').textContent = accuracy + '%';
+    document.getElementById('statWrong').textContent = stats.wrongQuestions.length;
+    document.getElementById('statFavorite').textContent = stats.favorites.length;
+    document.getElementById('totalPoints').textContent = stats.points;
+
+    // Progress bar
+    const progress = Math.round((Object.keys(stats.answeredQuestions).length / QUESTIONS.length) * 100);
+    document.getElementById('progressBar').style.width = progress + '%';
+    document.getElementById('progressText').textContent = `${Object.keys(stats.answeredQuestions).length}/${QUESTIONS.length}`;
+}
+
+function updateStreak() {
+    const today = new Date().toDateString();
+    const lastDate = currentUser.stats.lastStudyDate;
+
+    if (lastDate === today) {
+        // Already studied today
+    } else if (lastDate) {
+        const last = new Date(lastDate);
+        const diff = Math.floor((new Date(today) - last) / (1000 * 60 * 60 * 24));
+        if (diff > 1) {
+            currentUser.stats.streak = 0;
+        }
+    }
+
+    document.getElementById('streakCount').textContent = currentUser.stats.streak;
+}
+
+function updateBadges() {
+    const wrongCount = currentUser.stats.wrongQuestions.length;
+    const favCount = currentUser.stats.favorites.length;
+
+    const wrongBadge = document.getElementById('wrongCountBadge');
+    const favBadge = document.getElementById('favCountBadge');
+
+    if (wrongCount > 0) {
+        wrongBadge.textContent = wrongCount;
+        wrongBadge.classList.remove('hidden');
+    } else {
+        wrongBadge.classList.add('hidden');
+    }
+
+    if (favCount > 0) {
+        favBadge.textContent = favCount;
+        favBadge.classList.remove('hidden');
+    } else {
+        favBadge.classList.add('hidden');
+    }
+}
+
+function showToast(message, type = 'success') {
+    const toast = document.getElementById('toast');
+    const icon = document.getElementById('toastIcon');
+    const msg = document.getElementById('toastMessage');
+
+    msg.textContent = message;
+    icon.className = type === 'success' ? 'fas fa-check-circle text-green-400' :
+                     type === 'error' ? 'fas fa-exclamation-circle text-red-400' :
+                     'fas fa-info-circle text-blue-400';
+
+    toast.style.transform = 'translateY(0)';
+    toast.style.opacity = '1';
+
+    setTimeout(() => {
+        toast.style.transform = 'translateY(20px)';
+        toast.style.opacity = '0';
+    }, 2000);
+}
+
+// ==========================================
+// Question Loading & Display
+// ==========================================
+
+function getQuestionPool() {
+    switch (currentMode) {
+        case 'sequential':
+        case 'random':
+            return filteredQuestions;
+        case 'wrong':
+            return QUESTIONS.filter(q => currentUser.stats.wrongQuestions.includes(q.id));
+        case 'favorite':
+            return QUESTIONS.filter(q => currentUser.stats.favorites.includes(q.id));
+        case 'exam':
+            return examQuestions;
+        case 'chapter':
+            return filteredQuestions;
+        default:
+            return filteredQuestions;
+    }
+}
+
+function loadQuestion() {
+    const pool = getQuestionPool();
+
+    if (pool.length === 0) {
+        document.getElementById('questionText').textContent = currentMode === 'wrong' ? '太棒了！没有错题！' :
+                                                             currentMode === 'favorite' ? '还没有收藏题目' :
+                                                             '没有题目';
+        document.getElementById('optionsContainer').innerHTML = '';
+        document.getElementById('questionNumber').textContent = currentMode === 'wrong' ? '错题本' : '收藏夹';
+        return;
+    }
+
+    if (currentQuestionIndex >= pool.length) {
+        currentQuestionIndex = 0;
+    }
+
+    const question = pool[currentQuestionIndex];
+    if (!question) return;
+
+    // Update question display
+    document.getElementById('questionNumber').textContent = `第 ${question.id} 题`;
+    document.getElementById('questionText').textContent = question.question;
+
+    // Update favorite button
+    const isFav = currentUser.stats.favorites.includes(question.id);
+    const favBtn = document.getElementById('favBtn');
+    favBtn.innerHTML = isFav ?
+        '<i class="fas fa-heart text-pink-500 text-lg"></i>' :
+        '<i class="far fa-heart text-gray-400 text-lg"></i>';
+
+    // Render options
+    const optionsHtml = ['A', 'B', 'C', 'D'].map(opt => {
+        const isAnswered = currentUser.stats.answeredQuestions[question.id];
+        let classes = 'option-btn rounded-xl p-4 cursor-pointer flex items-center space-x-3';
+
+        if (isAnswered) {
+            if (opt === question.answer) {
+                classes += ' correct';
+            } else if (opt === isAnswered.selected && isAnswered.selected !== question.answer) {
+                classes += ' wrong';
+            }
+        }
+
+        return `
+            <div class="${classes}" onclick="selectOption('${opt}')" data-option="${opt}">
+                <div class="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center font-bold text-gray-600">
+                    ${opt}
+                </div>
+                <span class="flex-1 text-gray-700">${question.options[opt] || ''}</span>
+                ${isAnswered && opt === question.answer ? '<i class="fas fa-check-circle text-green-500"></i>' : ''}
+                ${isAnswered && opt === isAnswered.selected && isAnswered.selected !== question.answer ? '<i class="fas fa-times-circle text-red-500"></i>' : ''}
+            </div>
+        `;
+    }).join('');
+
+    document.getElementById('optionsContainer').innerHTML = optionsHtml;
+
+    // Reset state
+    selectedOption = null;
+    isAnswered = false;
+    document.getElementById('answerFeedback').classList.add('hidden');
+    document.getElementById('analysisSection').classList.add('hidden');
+    document.getElementById('submitBtn').classList.remove('hidden');
+    document.getElementById('nextBtn').classList.add('hidden');
+
+    // Check if already answered
+    const answered = currentUser.stats.answeredQuestions[question.id];
+    if (answered) {
+        isAnswered = true;
+        document.getElementById('submitBtn').classList.add('hidden');
+        document.getElementById('nextBtn').classList.remove('hidden');
+        showAnswerFeedback(question, answered.selected);
+    }
+
+    // Update navigation buttons
+    document.getElementById('prevBtn').disabled = currentQuestionIndex === 0;
+    document.getElementById('prevBtn').classList.toggle('opacity-50', currentQuestionIndex === 0);
+
+    // Highlight in grid
+    highlightGridQuestion(question.id);
+}
+
+function selectOption(option) {
+    if (isAnswered) return;
+
+    selectedOption = option;
+
+    // Update visual selection
+    document.querySelectorAll('.option-btn').forEach(btn => {
+        btn.classList.remove('selected');
+        if (btn.dataset.option === option) {
+            btn.classList.add('selected');
+        }
+    });
+}
+
+function submitAnswer() {
+    if (!selectedOption) {
+        showToast('请先选择答案', 'error');
+        return;
+    }
+
+    const pool = getQuestionPool();
+    const question = pool[currentQuestionIndex];
+    if (!question) return;
+
+    isAnswered = true;
+    const isCorrect = selectedOption === question.answer;
+
+    // Update stats
+    currentUser.stats.totalAnswered++;
+    if (isCorrect) {
+        currentUser.stats.totalCorrect++;
+        currentUser.stats.points += 10;
+
+        // Remove from wrong if was there
+        const wrongIdx = currentUser.stats.wrongQuestions.indexOf(question.id);
+        if (wrongIdx > -1) {
+            currentUser.stats.wrongQuestions.splice(wrongIdx, 1);
+        }
+    } else {
+        currentUser.stats.totalWrong++;
+        if (!currentUser.stats.wrongQuestions.includes(question.id)) {
+            currentUser.stats.wrongQuestions.push(question.id);
+        }
+    }
+
+    // Record answer
+    currentUser.stats.answeredQuestions[question.id] = {
+        selected: selectedOption,
+        correct: isCorrect,
+        timestamp: new Date().toISOString()
+    };
+
+    // Update daily stats
+    const today = new Date().toISOString().split('T')[0];
+    if (!currentUser.stats.dailyStats[today]) {
+        currentUser.stats.dailyStats[today] = { answered: 0, correct: 0 };
+    }
+    currentUser.stats.dailyStats[today].answered++;
+    if (isCorrect) currentUser.stats.dailyStats[today].correct++;
+
+    // Update streak
+    const todayStr = new Date().toDateString();
+    if (currentUser.stats.lastStudyDate !== todayStr) {
+        currentUser.stats.streak++;
+        currentUser.stats.lastStudyDate = todayStr;
+    }
+
+    saveCurrentUser(currentUser);
+    updateStats();
+    updateBadges();
+
+    // Show feedback
+    showAnswerFeedback(question, selectedOption);
+
+    // Update options visual
+    document.querySelectorAll('.option-btn').forEach(btn => {
+        if (btn.dataset.option === question.answer) {
+            btn.classList.add('correct');
+        }
+        if (btn.dataset.option === selectedOption && !isCorrect) {
+            btn.classList.add('wrong');
+        }
+        btn.style.cursor = 'default';
+    });
+
+    // Toggle buttons
+    document.getElementById('submitBtn').classList.add('hidden');
+    document.getElementById('nextBtn').classList.remove('hidden');
+
+    // Highlight grid
+    renderQuestionGrid();
+}
+
+function showAnswerFeedback(question, selected) {
+    const feedback = document.getElementById('answerFeedback');
+    const icon = document.getElementById('feedbackIcon');
+    const text = document.getElementById('feedbackText');
+    const correct = document.getElementById('correctAnswer');
+
+    const isCorrect = selected === question.answer;
+
+    feedback.classList.remove('hidden');
+    feedback.className = `mt-6 p-4 rounded-xl ${isCorrect ? 'bg-green-50' : 'bg-red-50'}`;
+
+    icon.className = isCorrect ? 'fas fa-check-circle text-green-500 text-xl' : 'fas fa-times-circle text-red-500 text-xl';
+    text.className = isCorrect ? 'font-bold text-green-700' : 'font-bold text-red-700';
+    text.textContent = isCorrect ? '回答正确！' : '回答错误';
+
+    correct.textContent = `正确答案：${question.answer}. ${question.options[question.answer]}`;
+}
+
+function showAnalysis() {
+    const pool = getQuestionPool();
+    const question = pool[currentQuestionIndex];
+    if (!question) return;
+
+    const section = document.getElementById('analysisSection');
+    section.classList.toggle('hidden');
+
+    if (!section.classList.contains('hidden')) {
+        // Generate simple analysis based on the question
+        const analysis = generateAnalysis(question);
+        document.getElementById('analysisText').textContent = analysis;
+    }
+}
+
+function generateAnalysis(question) {
+    // Simple analysis generator
+    const analyses = [
+        `本题考查的是对"${question.question.substring(0, 20)}..."的理解。正确答案是${question.answer}，即"${question.options[question.answer]}"。`,
+        `这道题的关键在于理解题目中的核心概念。${question.answer}选项"${question.options[question.answer]}"是最准确的描述。`,
+        `根据心理学相关理论，${question.answer}选项"${question.options[question.answer]}"是正确答案。建议结合教材相关内容复习。`
+    ];
+    return analyses[Math.floor(Math.random() * analyses.length)];
+}
+
+// ==========================================
+// Navigation Functions
+// ==========================================
+
+function nextQuestion() {
+    const pool = getQuestionPool();
+    if (currentQuestionIndex < pool.length - 1) {
+        currentQuestionIndex++;
+        loadQuestion();
+    } else {
+        if (currentMode === 'exam') {
+            finishExam();
+        } else {
+            showToast('已经是最后一题了', 'info');
+        }
+    }
+}
+
+function prevQuestion() {
+    if (currentQuestionIndex > 0) {
+        currentQuestionIndex--;
+        loadQuestion();
+    }
+}
+
+function jumpToQuestion() {
+    const input = document.getElementById('jumpToQuestion');
+    const qId = parseInt(input.value);
+
+    if (!qId) {
+        showToast('请输入题号', 'error');
+        return;
+    }
+
+    const pool = getQuestionPool();
+    const idx = pool.findIndex(q => q.id === qId);
+
+    if (idx === -1) {
+        showToast('未找到该题号', 'error');
+        return;
+    }
+
+    currentQuestionIndex = idx;
+    loadQuestion();
+    showToast(`已跳转到第 ${qId} 题`, 'success');
+    input.value = '';
+}
+
+// ==========================================
+// Mode Switching
+// ==========================================
+
+function switchMode(mode) {
+    currentMode = mode;
+    currentQuestionIndex = 0;
+
+    // Update sidebar active state
+    document.querySelectorAll('.sidebar-item').forEach(item => {
+        item.classList.remove('active');
+        if (item.dataset.mode === mode) {
+            item.classList.add('active');
+        }
+    });
+
+    // Close sidebar on mobile
+    if (window.innerWidth < 1024) {
+        document.getElementById('sidebar').classList.add('-translate-x-full');
+    }
+
+    switch (mode) {
+        case 'sequential':
+            filteredQuestions = getFilteredQuestions();
+            showToast('顺序刷题模式', 'info');
+            break;
+        case 'random':
+            filteredQuestions = shuffleArray(getFilteredQuestions());
+            showToast('随机刷题模式', 'info');
+            break;
+        case 'wrong':
+            if (currentUser.stats.wrongQuestions.length === 0) {
+                showToast('没有错题，继续加油！', 'success');
+                return;
+            }
+            showToast(`错题重做模式 (${currentUser.stats.wrongQuestions.length}题)`, 'info');
+            break;
+        case 'favorite':
+            if (currentUser.stats.favorites.length === 0) {
+                showToast('还没有收藏题目', 'info');
+                return;
+            }
+            showToast(`收藏夹 (${currentUser.stats.favorites.length}题)`, 'info');
+            break;
+        case 'exam':
+            startExam();
+            return;
+        case 'chapter':
+            showToast('章节练习模式', 'info');
+            break;
+    }
+
+    loadQuestion();
+    renderQuestionGrid();
+}
+
+function getFilteredQuestions() {
+    return QUESTIONS.filter(q => q.id >= rangeStart && q.id <= rangeEnd);
+}
+
+function applyRange() {
+    const start = parseInt(document.getElementById('rangeStart').value) || 1;
+    const end = parseInt(document.getElementById('rangeEnd').value) || QUESTIONS.length;
+
+    rangeStart = Math.max(1, start);
+    rangeEnd = Math.min(QUESTIONS[QUESTIONS.length - 1].id, end);
+
+    filteredQuestions = QUESTIONS.filter(q => q.id >= rangeStart && q.id <= rangeEnd);
+    currentQuestionIndex = 0;
+
+    showToast(`已设置范围: ${rangeStart} - ${rangeEnd} (${filteredQuestions.length}题)`, 'success');
+    loadQuestion();
+    renderQuestionGrid();
+}
+
+// ==========================================
+// Exam Mode
+// ==========================================
+
+function startExam() {
+    const questionCount = 50; // Exam has 50 questions
+    const allQuestions = [...QUESTIONS];
+    examQuestions = shuffleArray(allQuestions).slice(0, questionCount);
+
+    currentQuestionIndex = 0;
+    examStartTime = Date.now();
+
+    // Show timer
+    document.getElementById('examTimer').classList.remove('hidden');
+    startExamTimer();
+
+    showToast(`模拟考试开始！共 ${questionCount} 题`, 'info');
+    loadQuestion();
+    renderQuestionGrid();
+}
+
+function startExamTimer() {
+    if (examTimer) clearInterval(examTimer);
+
+    examTimer = setInterval(() => {
+        const elapsed = Math.floor((Date.now() - examStartTime) / 1000);
+        const minutes = Math.floor(elapsed / 60).toString().padStart(2, '0');
+        const seconds = (elapsed % 60).toString().padStart(2, '0');
+        document.getElementById('timerDisplay').textContent = `${minutes}:${seconds}`;
+    }, 1000);
+}
+
+function finishExam() {
+    if (examTimer) {
+        clearInterval(examTimer);
+        examTimer = null;
+    }
+
+    document.getElementById('examTimer').classList.add('hidden');
+
+    const totalQuestions = examQuestions.length;
+    let correctCount = 0;
+
+    examQuestions.forEach(q => {
+        const answer = currentUser.stats.answeredQuestions[q.id];
+        if (answer && answer.correct) correctCount++;
+    });
+
+    const accuracy = Math.round((correctCount / totalQuestions) * 100);
+    const score = correctCount * 2; // Each question is 2 points
+
+    // Save exam history
+    currentUser.stats.examHistory.push({
+        date: new Date().toISOString(),
+        score: score,
+        accuracy: accuracy,
+        totalQuestions: totalQuestions,
+        correctCount: correctCount,
+        timeSpent: Math.floor((Date.now() - examStartTime) / 1000)
+    });
+
+    saveCurrentUser(currentUser);
+
+    // Show result modal
+    document.getElementById('examScore').textContent = score;
+    document.getElementById('examAccuracy').textContent = accuracy + '%';
+    document.getElementById('examResultModal').classList.remove('hidden');
+
+    // Add points
+    currentUser.stats.points += score;
+    saveCurrentUser(currentUser);
+    updateStats();
+}
+
+function reviewExamWrong() {
+    closeExamResult();
+    switchMode('wrong');
+}
+
+function closeExamResult() {
+    document.getElementById('examResultModal').classList.add('hidden');
+}
+
+// ==========================================
+// Favorite Functions
+// ==========================================
+
+function toggleFavorite() {
+    const pool = getQuestionPool();
+    const question = pool[currentQuestionIndex];
+    if (!question) return;
+
+    const idx = currentUser.stats.favorites.indexOf(question.id);
+    if (idx > -1) {
+        currentUser.stats.favorites.splice(idx, 1);
+        showToast('已取消收藏', 'info');
+    } else {
+        currentUser.stats.favorites.push(question.id);
+        showToast('已收藏', 'success');
+    }
+
+    saveCurrentUser(currentUser);
+    updateStats();
+    updateBadges();
+
+    // Update button
+    const isFav = currentUser.stats.favorites.includes(question.id);
+    document.getElementById('favBtn').innerHTML = isFav ?
+        '<i class="fas fa-heart text-pink-500 text-lg"></i>' :
+        '<i class="far fa-heart text-gray-400 text-lg"></i>';
+}
+
+// ==========================================
+// Question Grid
+// ==========================================
+
+function renderQuestionGrid() {
+    const pool = getQuestionPool();
+    const grid = document.getElementById('questionGrid');
+
+    let html = '';
+    const maxDisplay = Math.min(pool.length, 100); // Limit display
+
+    for (let i = 0; i < maxDisplay; i++) {
+        const q = pool[i];
+        const answered = currentUser.stats.answeredQuestions[q.id];
+        let bgColor = 'bg-gray-200 hover:bg-gray-300';
+
+        if (answered) {
+            bgColor = answered.correct ? 'bg-green-500' : 'bg-red-500';
+        }
+
+        if (i === currentQuestionIndex) {
+            bgColor = 'bg-purple-500';
+        }
+
+        html += `<button onclick="goToGridQuestion(${i})" class="${bgColor} text-white text-xs rounded-lg p-2 transition">${q.id}</button>`;
+    }
+
+    if (pool.length > maxDisplay) {
+        html += `<div class="col-span-full text-center text-gray-500 text-sm">还有 ${pool.length - maxDisplay} 题...</div>`;
+    }
+
+    grid.innerHTML = html;
+}
+
+function goToGridQuestion(index) {
+    currentQuestionIndex = index;
+    loadQuestion();
+}
+
+function highlightGridQuestion(questionId) {
+    // Already handled in renderQuestionGrid
+}
+
+// ==========================================
+// Profile & Statistics
+// ==========================================
+
+function showProfile() {
+    document.getElementById('profileModal').classList.remove('hidden');
+    renderProfileStats();
+    closeUserMenu();
+}
+
+function closeProfile() {
+    document.getElementById('profileModal').classList.add('hidden');
+}
+
+function renderProfileStats() {
+    const stats = currentUser.stats;
+    const accuracy = stats.totalAnswered > 0 ? Math.round((stats.totalCorrect / stats.totalAnswered) * 100) : 0;
+
+    document.getElementById('profileTotal').textContent = stats.totalAnswered;
+    document.getElementById('profileAccuracy').textContent = accuracy + '%';
+    document.getElementById('profileWrong').textContent = stats.wrongQuestions.length;
+    document.getElementById('profileStreak').textContent = stats.streak;
+
+    // Render daily chart
+    renderDailyChart();
+
+    // Render weak points
+    renderWeakPoints();
+}
+
+function renderDailyChart() {
+    const chart = document.getElementById('dailyChart');
+    const dailyStats = currentUser.stats.dailyStats;
+
+    // Get last 7 days
+    const dates = [];
+    for (let i = 6; i >= 0; i--) {
+        const d = new Date();
+        d.setDate(d.getDate() - i);
+        dates.push(d.toISOString().split('T')[0]);
+    }
+
+    const maxAnswered = Math.max(...dates.map(d => (dailyStats[d]?.answered || 0)), 1);
+
+    let html = '';
+    dates.forEach(date => {
+        const count = dailyStats[date]?.answered || 0;
+        const height = Math.max(10, (count / maxAnswered) * 100);
+        const dayName = new Date(date).toLocaleDateString('zh-CN', { weekday: 'short' });
+
+        html += `
+            <div class="flex flex-col items-center flex-1">
+                <div class="text-xs text-gray-500 mb-1">${count}</div>
+                <div class="w-full bg-gradient-to-t from-purple-500 to-indigo-500 rounded-t-lg chart-bar" style="height: ${height}%"></div>
+                <div class="text-xs text-gray-500 mt-1">${dayName}</div>
+            </div>
+        `;
+    });
+
+    chart.innerHTML = html;
+}
+
+function renderWeakPoints() {
+    const weakPoints = document.getElementById('weakPoints');
+    const wrongQuestions = currentUser.stats.wrongQuestions;
+
+    if (wrongQuestions.length === 0) {
+        weakPoints.innerHTML = '<p class="text-gray-500 text-center">暂无错题数据</p>';
+        return;
+    }
+
+    // Group by question number ranges
+    const ranges = [
+        { name: '心理学基础', start: 1, end: 50 },
+        { name: '情绪与压力', start: 51, end: 100 },
+        { name: '人际关系', start: 101, end: 150 },
+        { name: '心理健康', start: 151, end: 200 },
+        { name: '学习心理', start: 201, end: 250 },
+        { name: '网络心理', start: 251, end: 300 },
+        { name: '恋爱心理', start: 301, end: 350 },
+        { name: '其他', start: 351, end: 1000 }
+    ];
+
+    let html = '';
+    ranges.forEach(range => {
+        const count = wrongQuestions.filter(id => id >= range.start && id <= range.end).length;
+        if (count > 0) {
+            const percentage = Math.round((count / wrongQuestions.length) * 100);
+            html += `
+                <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                    <div>
+                        <p class="font-bold text-gray-700">${range.name}</p>
+                        <p class="text-sm text-gray-500">${count} 道错题</p>
+                    </div>
+                    <div class="w-24 bg-gray-200 rounded-full h-2">
+                        <div class="bg-red-500 h-2 rounded-full" style="width: ${percentage}%"></div>
+                    </div>
+                </div>
+            `;
+        }
+    });
+
+    weakPoints.innerHTML = html || '<p class="text-gray-500 text-center">暂无数据</p>';
+}
+
+// ==========================================
+// Utility Functions
+// ==========================================
+
+function shuffleArray(array) {
+    const newArray = [...array];
+    for (let i = newArray.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+    }
+    return newArray;
+}
+
+function toggleSidebar() {
+    const sidebar = document.getElementById('sidebar');
+    sidebar.classList.toggle('-translate-x-full');
+}
+
+function toggleUserMenu() {
+    const menu = document.getElementById('userMenu');
+    menu.classList.toggle('hidden');
+}
+
+function closeUserMenu() {
+    document.getElementById('userMenu').classList.add('hidden');
+}
+
+function exportData() {
+    const data = {
+        user: currentUser.nickname,
+        exportDate: new Date().toISOString(),
+        stats: currentUser.stats,
+        wrongQuestions: currentUser.stats.wrongQuestions.map(id => {
+            const q = QUESTIONS.find(q => q.id === id);
+            return q ? { id: q.id, question: q.question, answer: q.answer } : null;
+        }).filter(Boolean)
+    };
+
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `心理学题库_${currentUser.nickname}_${new Date().toISOString().split('T')[0]}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+
+    showToast('数据导出成功', 'success');
+    closeUserMenu();
+}
+
+function resetProgress() {
+    if (!confirm('确定要重置所有学习进度吗？此操作不可恢复！')) return;
+
+    currentUser.stats = {
+        totalAnswered: 0,
+        totalCorrect: 0,
+        totalWrong: 0,
+        wrongQuestions: [],
+        favorites: [],
+        answeredQuestions: {},
+        dailyStats: {},
+        streak: 0,
+        lastStudyDate: null,
+        points: 0,
+        examHistory: []
+    };
+
+    saveCurrentUser(currentUser);
+    updateStats();
+    updateBadges();
+    loadQuestion();
+    renderQuestionGrid();
+    showToast('学习进度已重置', 'info');
+}
+
+// ==========================================
+// Keyboard Shortcuts
+// ==========================================
+
+document.addEventListener('keydown', (e) => {
+    if (document.getElementById('mainApp').style.display === 'none') return;
+
+    switch(e.key) {
+        case '1':
+        case 'a':
+        case 'A':
+            if (!isAnswered) selectOption('A');
+            break;
+        case '2':
+        case 'b':
+        case 'B':
+            if (!isAnswered) selectOption('B');
+            break;
+        case '3':
+        case 'c':
+        case 'C':
+            if (!isAnswered) selectOption('C');
+            break;
+        case '4':
+        case 'd':
+        case 'D':
+            if (!isAnswered) selectOption('D');
+            break;
+        case 'Enter':
+            if (!isAnswered && selectedOption) {
+                submitAnswer();
+            } else if (isAnswered) {
+                nextQuestion();
+            }
+            break;
+        case 'ArrowLeft':
+            prevQuestion();
+            break;
+        case 'ArrowRight':
+            nextQuestion();
+            break;
+        case 'f':
+        case 'F':
+            toggleFavorite();
+            break;
+    }
+});
+
+// Close menus when clicking outside
+document.addEventListener('click', (e) => {
+    if (!e.target.closest('#userMenu') && !e.target.closest('[onclick="toggleUserMenu()"]')) {
+        closeUserMenu();
+    }
+});
+
+// ==========================================
+// Initialize App
+// ==========================================
+
+// Check for existing user on page load
+document.addEventListener('DOMContentLoaded', () => {
+    checkAuth();
+});
+
+</script>
+</body>
+</html>
