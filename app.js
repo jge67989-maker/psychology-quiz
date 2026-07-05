@@ -339,7 +339,6 @@ function loadQuestion() {
     if (!question) return;
 
     // Update question display - show sequential number
-    const pool = getQuestionPool();
     const seqNum = pool.findIndex(q => q.id === question.id) + 1;
     document.getElementById('questionNumber').textContent = `第 ${seqNum} 题`;
 
