@@ -338,8 +338,10 @@ function loadQuestion() {
     const question = pool[currentQuestionIndex];
     if (!question) return;
 
-    // Update question display
-    document.getElementById('questionNumber').textContent = `第 ${question.id} 题`;
+    // Update question display - show sequential number
+    const pool = getQuestionPool();
+    const seqNum = pool.findIndex(q => q.id === question.id) + 1;
+    document.getElementById('questionNumber').textContent = `第 ${seqNum} 题`;
 
     // Update question type display
     const typeLabels = { single: '单选题', multi: '多选题', judge: '判断题' };
@@ -907,22 +909,44 @@ function toggleFavorite() {
 // ==========================================
 
 let gridPage = 0;
-const GRID_PAGE_SIZE = 100;
+let gridMode = 'all'; // 'all', 'single', 'multi', 'judge'
+const GRID_PAGE_SIZE = 50;
+
+function getFilteredPool() {
+    const pool = getQuestionPool();
+    if (gridMode === 'all') return pool;
+    return pool.filter(q => q.type === gridMode);
+}
 
 function renderQuestionGrid() {
-    const pool = getQuestionPool();
+    const pool = getFilteredPool();
     const grid = document.getElementById('questionGrid');
 
     const totalPages = Math.ceil(pool.length / GRID_PAGE_SIZE);
     const startIdx = gridPage * GRID_PAGE_SIZE;
     const endIdx = Math.min(startIdx + GRID_PAGE_SIZE, pool.length);
 
-    let html = '';
+    // Add filter tabs
+    let html = `
+        <div class="col-span-full flex flex-wrap items-center gap-2 mb-4">
+            <button onclick="setGridMode('all')" class="px-3 py-1 rounded-lg text-sm ${gridMode === 'all' ? 'bg-purple-500 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}">全部</button>
+            <button onclick="setGridMode('single')" class="px-3 py-1 rounded-lg text-sm ${gridMode === 'single' ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}">单选题</button>
+            <button onclick="setGridMode('multi')" class="px-3 py-1 rounded-lg text-sm ${gridMode === 'multi' ? 'bg-orange-500 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}">多选题</button>
+            <button onclick="setGridMode('judge')" class="px-3 py-1 rounded-lg text-sm ${gridMode === 'judge' ? 'bg-teal-500 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}">判断题</button>
+        </div>
+        <div class="col-span-full flex items-center gap-3 mb-2 text-xs text-gray-500">
+            <span class="flex items-center gap-1"><span class="w-3 h-3 bg-green-500 rounded"></span>答对</span>
+            <span class="flex items-center gap-1"><span class="w-3 h-3 bg-red-500 rounded"></span>答错</span>
+            <span class="flex items-center gap-1"><span class="w-3 h-3 bg-purple-500 rounded"></span>当前</span>
+            <span class="flex items-center gap-1"><span class="w-3 h-3 bg-gray-300 rounded"></span>未答</span>
+        </div>
+    `;
 
+    // Display questions with new sequential numbers
     for (let i = startIdx; i < endIdx; i++) {
         const q = pool[i];
         const answered = currentUser.stats.answeredQuestions[q.id];
-        let bgColor = 'bg-gray-200 hover:bg-gray-300';
+        let bgColor = 'bg-gray-300 hover:bg-gray-400';
 
         if (answered) {
             bgColor = answered.correct ? 'bg-green-500' : 'bg-red-500';
@@ -932,7 +956,9 @@ function renderQuestionGrid() {
             bgColor = 'bg-purple-500';
         }
 
-        html += `<button onclick="goToGridQuestion(${i})" class="${bgColor} text-white text-xs rounded-lg p-2 transition" title="第${q.id}题">${q.id}</button>`;
+        // Use sequential number (i+1) instead of original question id
+        const displayNum = i + 1;
+        html += `<button onclick="goToGridQuestion(${i})" class="${bgColor} text-white text-xs rounded-lg p-2 transition font-bold" title="第${displayNum}题 (原题${q.id})">${displayNum}</button>`;
     }
 
     // Add pagination controls
@@ -941,7 +967,7 @@ function renderQuestionGrid() {
         if (gridPage > 0) {
             html += `<button onclick="changeGridPage(-1)" class="bg-gray-200 hover:bg-gray-300 text-gray-700 px-3 py-1 rounded text-sm">上一页</button>`;
         }
-        html += `<span class="text-sm text-gray-500">${gridPage + 1}/${totalPages}</span>`;
+        html += `<span class="text-sm text-gray-500">第 ${gridPage + 1} 页 / 共 ${totalPages} 页 (${pool.length}题)</span>`;
         if (gridPage < totalPages - 1) {
             html += `<button onclick="changeGridPage(1)" class="bg-gray-200 hover:bg-gray-300 text-gray-700 px-3 py-1 rounded text-sm">下一页</button>`;
         }
@@ -951,8 +977,14 @@ function renderQuestionGrid() {
     grid.innerHTML = html;
 }
 
+function setGridMode(mode) {
+    gridMode = mode;
+    gridPage = 0;
+    renderQuestionGrid();
+}
+
 function changeGridPage(delta) {
-    const pool = getQuestionPool();
+    const pool = getFilteredPool();
     const totalPages = Math.ceil(pool.length / GRID_PAGE_SIZE);
     gridPage = Math.max(0, Math.min(totalPages - 1, gridPage + delta));
     renderQuestionGrid();
